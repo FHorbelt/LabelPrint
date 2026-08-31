@@ -85,7 +85,13 @@ function zeichne() {
   if (laufendesZeichnen) laufendesZeichnen.cancel();
   laufendesZeichnen = renderSheets($('pagesWrap'), L, s);
 
+  // Waehrend gezeichnet wird, ist der Bogen unvollstaendig — solange darf er
+  // nicht gedruckt werden. Freigabe erst, wenn der Durchgang fertig ist.
+  const dieserLauf = laufendesZeichnen;
+  setzeDruckSperre(true, '');
+
   laufendesZeichnen.done.then(({ failed }) => {
+    if (dieserLauf !== laufendesZeichnen) return;   // ein neuerer Lauf hat uebernommen
     if (failed > 0) {
       setzeDruckSperre(true,
         `${failed} QR-Code${failed === 1 ? '' : 's'} konnte${failed === 1 ? '' : 'n'} nicht erzeugt werden.`

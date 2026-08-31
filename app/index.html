@@ -114,8 +114,14 @@
       <summary>Darstellung</summary>
       <div class="fields">
         <label class="check"><input type="checkbox" id="showText"> Seriennummer als Text</label>
-        <label class="check"><input type="checkbox" id="stackPrefix"> Präfix in eigener Zeile</label>
-        <label class="check"><input type="checkbox" id="showBorder"> Rahmen mitdrucken</label>
+        <label class="check"><input type="checkbox" id="showPrefixOnLabel"> Präfix auf dem Etikett anzeigen</label>
+        <label class="full">Zusatztext auf dem Etikett
+          <input type="text" id="labelText" placeholder="z. B. Florian"></label>
+        <label class="check"><input type="checkbox" id="stackPrefix"> Beschriftung in eigener Zeile</label>
+        <p class="hint" style="margin:6px 0 0; font-size:11px; line-height:1.45;">
+          Der QR-Code enthält immer die vollständige Nummer mit Präfix —
+          unabhängig davon, was auf dem Etikett steht.</p>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="showBorder"> Rahmen mitdrucken</label>
         <label class="check"><input type="checkbox" id="showGuides"> Hilfslinien anzeigen</label>
       </div>
     </details>

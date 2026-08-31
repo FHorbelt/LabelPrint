@@ -64,12 +64,13 @@ function labelElement(L, s, parts, left, top) {
     txt.style.paddingLeft = '0.8mm';
     txt.style.paddingRight = '0.8mm';
 
-    if (s.stackPrefix && parts.prefix.trim() !== '') {
+    // Gestapelt nur, wenn die obere Zeile ueberhaupt etwas enthaelt.
+    if (s.stackPrefix && parts.labelTop !== '') {
       txt.classList.add('stacked');
       const p = document.createElement('div');
       p.className = 'prefix-line';
       p.style.fontSize = `${s.prefixFontSize}mm`;
-      p.textContent = parts.prefix;
+      p.textContent = parts.labelTop;
       txt.appendChild(p);
 
       const n = document.createElement('div');
@@ -79,7 +80,7 @@ function labelElement(L, s, parts, left, top) {
       txt.appendChild(n);
     } else {
       txt.style.fontSize = `${s.fontSize}mm`;
-      txt.textContent = parts.full;
+      txt.textContent = parts.labelLine;
     }
     lab.appendChild(txt);
   }
@@ -155,8 +156,12 @@ export function renderSheets(container, L, s) {
 
     const scheibe = () => {
       if (abgebrochen) { resolve({ pages, drawn: i, failed }); return; }
+      // Mindestens ein Auftrag je Frame: ist die Uhr beim Eintritt schon ueber
+      // der Frist, verarbeitet eine reine while-Schleife nichts und plant sich
+      // endlos neu — die Vorschau bliebe ohne QR-Codes stehen, ohne Fehler und
+      // ohne Drucksperre. Deshalb do/while.
       const bis = performance.now() + 12;
-      while (i < auftraege.length && performance.now() < bis) {
+      do {
         const a = auftraege[i];
         try {
           a.qrCell.innerHTML = qrSVG(a.daten, a.groesse);
@@ -168,14 +173,19 @@ export function renderSheets(container, L, s) {
           failed++;
         }
         i++;
-      }
+      } while (i < auftraege.length && performance.now() < bis);
       if (i < auftraege.length) {
-        requestAnimationFrame(scheibe);
+        setTimeout(scheibe, 0);
       } else {
         resolve({ pages, drawn: i, failed });
       }
     };
-    requestAnimationFrame(scheibe);
+    // Bewusst setTimeout statt requestAnimationFrame: rAF pausiert vollstaendig,
+    // sobald der Tab in den Hintergrund geht oder der Rahmen nicht sichtbar ist.
+    // Dann wuerden Etiketten ohne QR-Code stehenbleiben, ohne dass `done` je
+    // ausloest — also ohne Warnung und ohne Drucksperre. Die Fluessigkeit kommt
+    // aus der 12-ms-Zeitscheibe, nicht aus dem Bildtakt.
+    setTimeout(scheibe, 0);
   });
 
   return { cancel() { abgebrochen = true; }, done };

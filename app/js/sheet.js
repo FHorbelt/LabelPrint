@@ -114,12 +114,32 @@ export function sheetCSS(L) {
 }
 
 // Seriennummer eines Etiketts. i ist der Index ab 0.
+//
+// Der QR-Inhalt (`full`) und die Aufschrift sind bewusst entkoppelt: der Code
+// traegt immer die vollstaendige Nummer mit Praefix, waehrend auf dem Etikett
+// das Praefix ausgeblendet und stattdessen ein freier Zusatztext stehen kann.
+// Beispiel: Praefix "ASN", Zusatztext "Florian", Praefix ausgeblendet
+//   -> full "ASN000001", Aufschrift "Florian" / "000001".
 export function buildParts(s, i) {
   const prefix = String(s.prefix ?? '');
   const suffix = String(s.suffix ?? '');
+  const labelText = String(s.labelText ?? '');
+  // Fehlt das Feld (alte gespeicherte Einstellungen), wird das Praefix gezeigt.
+  const zeigePrefix = s.showPrefixOnLabel !== false;
+
   const start = parseInt(s.startNum, 10) || 0;
   const pad = Math.max(1, parseInt(s.padDigits, 10) || 1);
   const num = (start + i).toString().padStart(pad, '0');
   const numberPart = `${num}${suffix}`;
-  return { prefix, numberPart, full: `${prefix}${numberPart}` };
+
+  const zusatz = labelText.trim();
+  const praefixAufEtikett = zeigePrefix ? prefix.trim() : '';
+
+  // Obere Zeile der gestapelten Darstellung.
+  const labelTop = [zusatz, praefixAufEtikett].filter(Boolean).join(' ');
+  // Einzeilige Darstellung: das Praefix haengt ohne Leerzeichen an der Nummer,
+  // der Zusatztext wird davon durch ein Leerzeichen getrennt.
+  const labelLine = [zusatz, `${praefixAufEtikett}${numberPart}`].filter(Boolean).join(' ');
+
+  return { prefix, numberPart, full: `${prefix}${numberPart}`, labelTop, labelLine };
 }

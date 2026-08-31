@@ -8,9 +8,10 @@ const $ = (id) => document.getElementById(id);
 export const FIELDS = Object.keys(DEFAULTS);
 
 const CHECKBOXES = new Set([
-  'autoCenter', 'fitPrintable', 'showGuides', 'showText', 'stackPrefix', 'showBorder'
+  'autoCenter', 'fitPrintable', 'showGuides', 'showText', 'stackPrefix', 'showBorder',
+  'showPrefixOnLabel'
 ]);
-const TEXTS = new Set(['prefix', 'suffix', 'qrTemplate']);
+const TEXTS = new Set(['prefix', 'suffix', 'qrTemplate', 'labelText']);
 
 export function readForm() {
   const s = { ...DEFAULTS };

@@ -15,7 +15,8 @@ export const DEFAULTS = {
   prefix: 'AR-', suffix: '', startNum: 1, padDigits: 6,
   qrTemplate: '{nr}', count: 189,
   // Darstellung
-  showText: true, stackPrefix: true, showBorder: false
+  showText: true, stackPrefix: true, showBorder: false,
+  showPrefixOnLabel: true, labelText: ''
 };
 
 export const BUILTIN = {
