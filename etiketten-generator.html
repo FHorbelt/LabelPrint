@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Archiv-Etiketten Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root{
+    --ink:#1b1f23;
+    --paper:#ffffff;
+    --line:#d7dce1;
+    --accent:#2a5d63;
+    --accent-soft:#e7f0ef;
+    --muted:#5b6570;
+    --danger:#a4342a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color:var(--ink);
+    background:#f2f4f6;
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* ---------- Steuerpanel ---------- */
+  .panel{
+    width:340px;
+    flex:0 0 340px;
+    background:var(--paper);
+    border-right:1px solid var(--line);
+    padding:20px;
+    overflow-y:auto;
+    max-height:100vh;
+  }
+  .panel h1{
+    font-size:17px;
+    margin:0 0 4px;
+    letter-spacing:.2px;
+  }
+  .panel .sub{
+    font-size:12px;
+    color:var(--muted);
+    margin:0 0 18px;
+  }
+  fieldset{
+    border:1px solid var(--line);
+    border-radius:6px;
+    margin:0 0 14px;
+    padding:10px 12px 14px;
+  }
+  legend{
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--accent);
+    padding:0 4px;
+  }
+  .row{
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+  }
+  .row > div{flex:1;}
+  label{
+    display:block;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-bottom:3px;
+  }
+  input[type=text], input[type=number]{
+    width:100%;
+    padding:6px 7px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    font-size:13px;
+    font-family:inherit;
+  }
+  select{
+    width:100%;
+    padding:6px 7px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    font-size:13px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+  }
+  input:focus, select:focus{outline:2px solid var(--accent-soft); border-color:var(--accent);}
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:10px;
+    font-size:12.5px;
+    color:var(--ink);
+  }
+  .checkbox-row input{width:auto;}
+
+  .info-box{
+    background:var(--accent-soft);
+    border:1px solid #c7dcda;
+    border-radius:6px;
+    padding:10px 12px;
+    font-size:12.5px;
+    line-height:1.55;
+    margin-bottom:14px;
+  }
+  .info-box b{color:var(--accent);}
+  .info-box .warn{color:var(--danger); font-weight:600;}
+
+  button{
+    font-family:inherit;
+    font-size:13px;
+    border:none;
+    border-radius:5px;
+    padding:9px 12px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .btn-main{
+    background:var(--accent);
+    color:#fff;
+    width:100%;
+    margin-top:4px;
+  }
+  .btn-main:hover{background:#204a4f;}
+  .btn-secondary{
+    background:#eef1f3;
+    color:var(--ink);
+    width:100%;
+    margin-top:8px;
+  }
+  .btn-secondary:hover{background:#e3e7ea;}
+  .btn-fill{
+    background:none;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    padding:3px 8px;
+    font-size:11px;
+    font-weight:600;
+    margin-left:6px;
+  }
+  .btn-fill:hover{background:var(--accent-soft);}
+
+  /* ---------- Vorschau ---------- */
+  .viewport{
+    flex:1;
+    padding:26px;
+    overflow:auto;
+  }
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .toolbar .status{
+    font-size:13px;
+    color:var(--muted);
+  }
+  .toolbar .status b{color:var(--ink);}
+
+  .pages-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:22px;
+  }
+  .page-frame{
+    background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.15), 0 8px 24px rgba(0,0,0,.08);
+    position:relative;
+    transform-origin:top left;
+  }
+  .page-caption{
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .section-outline{
+    position:absolute;
+    border:1px dashed #c3c9ce;
+  }
+  /* Grenze des bedruckbaren Bereichs - reine Bildschirmhilfe */
+  .safe-area{
+    position:absolute;
+    border:1px dashed var(--danger);
+    pointer-events:none;
+  }
+  .label{
+    position:absolute;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    /* Stanzkontur: Farbe und Staerke aus der HERMA-Vorlage, mittig auf der
+       Schnittkante, damit sich beruehrende Zeilen EINE Linie teilen. */
+    outline:0.3mm solid #6f6e6e;
+    outline-offset:-0.15mm;
+  }
+  /* Wird der Rahmen mitgedruckt, zeigt die Vorschau ihn auch schwarz. */
+  .label.frame{outline-color:#000;}
+  .label .qr{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .label .txt{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:"Consolas","Courier New",monospace;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:.2px;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .label .txt.stacked{
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0.4mm;
+  }
+  .label .txt .prefix-line{
+    font-weight:500;
+    letter-spacing:.4px;
+    line-height:1;
+  }
+  .label .txt .number-line{
+    font-weight:700;
+    line-height:1;
+  }
+
+  .no-print{}
+
+  @media print{
+    /* Flex-Container fragmentieren im Seitenlayout unzuverlaessig -> Blockfluss */
+    body{background:#fff; display:block; min-height:0;}
+    .panel, .toolbar, .page-caption, .no-print{display:none !important;}
+    .viewport{padding:0; overflow:visible;}
+    .pages-wrap{display:block; gap:0;}
+    .page-frame{
+      box-shadow:none !important;
+      transform:none !important;
+      margin:0;
+    }
+    /* Umbruch nur ZWISCHEN Bogen. Ein break-after auf dem letzten Bogen
+       erzeugt in WebKit/Safari eine leere Folgeseite. Zwischen zwei
+       .page-frame steht die .page-caption, deshalb ~ statt +. */
+    .page-frame ~ .page-frame{break-before:page; page-break-before:always;}
+    .section-outline{border:none;}
+    /* Die graue Stanzkontur ist nur Bildschirmhilfe und wird nie gedruckt. */
+    .label{outline:none;}
+    .label.frame{outline:0.3mm solid #000; outline-offset:-0.15mm;}
+    /* @page wird in render() aus pageW/pageH erzeugt -> #pageStyle */
+  }
+</style>
+<!-- Seitenbox aus pageW/pageH; wird von render() gefuellt -->
+<style id="pageStyle"></style>
+</head>
+<body>
+
+<div class="panel no-print">
+  <h1>Archiv-Etiketten Generator</h1>
+  <p class="sub">Etikettenbogen mit QR-Code — voreingestellt auf HERMA 25,4 × 10 mm</p>
+
+  <fieldset>
+    <legend>Vorlage</legend>
+    <div>
+      <label>Etikettenbogen</label>
+      <select id="preset">
+        <option value="herma4333">HERMA 4243/4244/4333 — 25,4 × 10 mm, 189 Stück</option>
+        <option value="bogen4">Bogen 4 × 208 × 73,5 mm (vorherige Einstellung)</option>
+        <option value="custom">Benutzerdefiniert</option>
+      </select>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Bogen &amp; Abschnitte</legend>
+    <div class="row">
+      <div><label>Seitenbreite (mm)</label><input type="number" id="pageW" value="210" step="0.1"></div>
+      <div><label>Seitenhöhe (mm)</label><input type="number" id="pageH" value="297" step="0.1"></div>
+    </div>
+    <div class="row">
+      <div><label>Abschnittsbreite (mm)</label><input type="number" id="secW" value="192.8" step="0.1"></div>
+      <div><label>Abschnittshöhe (mm)</label><input type="number" id="secH" value="270" step="0.1"></div>
+    </div>
+    <div class="row">
+      <div><label>Abschnitte (vertikal)</label><input type="number" id="secRows" value="1" min="1" step="1"></div>
+      <div><label>Abstand zw. Abschnitten (mm)</label><input type="number" id="secGapY" value="0" step="0.05"></div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="autoCenter" checked>
+      <label style="margin:0;">Automatisch auf Seite zentrieren</label>
+    </div>
+    <div class="row" id="manualMarginRow" style="display:none;">
+      <div><label>Rand links (mm)</label><input type="number" id="marginLeft" value="1" step="0.1"></div>
+      <div><label>Rand oben (mm)</label><input type="number" id="marginTop" value="1.25" step="0.1"></div>
+    </div>
+    <div class="row">
+      <div><label>Nicht bedruckbarer Rand (mm)</label><input type="number" id="safeMargin" value="4.2" step="0.1" min="0"></div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="fitPrintable">
+      <label style="margin:0;">Layout in bedruckbaren Bereich einpassen</label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="showGuides" checked>
+      <label style="margin:0;">Hilfslinien anzeigen (Abschnitt, druckbarer Bereich)</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Einzeletikett</legend>
+    <div class="row">
+      <div><label>Breite (mm) — min. 25,4</label><input type="number" id="labW" value="25.4" step="0.1"></div>
+      <div><label>Höhe (mm) — min. 10</label><input type="number" id="labH" value="10" step="0.1"></div>
+    </div>
+    <div class="row">
+      <div><label>Abstand horizontal (mm)</label><input type="number" id="gapX" value="2.5" step="0.05"></div>
+      <div><label>Abstand vertikal (mm)</label><input type="number" id="gapY" value="0" step="0.05"></div>
+    </div>
+    <div class="row">
+      <div><label>Schriftgröße Nummer (mm)</label><input type="number" id="fontSize" value="2.5" step="0.1"></div>
+      <div><label>QR-Rand innen (mm)</label><input type="number" id="qrPad" value="0.6" step="0.1"></div>
+    </div>
+    <div class="row">
+      <div><label>Eckenradius (mm)</label><input type="number" id="labRadius" value="1.1" step="0.1" min="0"></div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="showBorder">
+      <label style="margin:0;">Rahmen um jedes Etikett drucken</label>
+    </div>
+    <p style="font-size:11px; color:var(--muted); margin:6px 0 0; line-height:1.45;">
+      Auf gestanzter Ware (HERMA) besser abschalten — die Stanzkante ist bereits vorhanden,
+      und ein gedruckter Rahmen wirkt bei minimalem Papierversatz schief.
+    </p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Seriennummern &amp; QR-Inhalt</legend>
+    <div class="row">
+      <div><label>Präfix</label><input type="text" id="prefix" value="AR-"></div>
+      <div><label>Suffix</label><input type="text" id="suffix" value=""></div>
+    </div>
+    <div class="row">
+      <div><label>Startnummer</label><input type="number" id="startNum" value="1" step="1"></div>
+      <div><label>Stellen (führende Nullen)</label><input type="number" id="padDigits" value="6" step="1" min="1"></div>
+    </div>
+    <div style="margin-top:8px;">
+      <label>QR-Inhalt-Vorlage <span style="color:#9aa3ab;">({nr} = Seriennummer)</span></label>
+      <input type="text" id="qrTemplate" value="{nr}">
+    </div>
+    <div class="row">
+      <div>
+        <label>Anzahl Etiketten <button type="button" class="btn-fill" id="fillMaxBtn">1 Seite füllen</button></label>
+        <input type="number" id="count" value="189" step="1" min="1">
+      </div>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="showText" checked>
+      <label style="margin:0;">Seriennummer zusätzlich als Text anzeigen</label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="stackPrefix" checked>
+      <label style="margin:0;">Präfix in eigener Zeile über der Nummer</label>
+    </div>
+    <div class="row" id="prefixFontRow">
+      <div><label>Schriftgröße Präfix (mm)</label><input type="number" id="prefixFontSize" value="1.8" step="0.1"></div>
+    </div>
+  </fieldset>
+
+  <div class="info-box" id="infoBox">wird berechnet…</div>
+
+  <button class="btn-main" id="generateBtn">Vorschau aktualisieren</button>
+  <button class="btn-secondary" id="printBtn">Drucken / Als PDF speichern</button>
+  <p style="font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5;">
+    Öffnet die Druckvorschau in einem neuen Tab. Falls sich nichts öffnet: Pop-ups erlauben oder die HTML-Datei herunterladen und direkt im Browser öffnen.
+  </p>
+</div>
+
+<div class="viewport">
+  <div class="toolbar no-print">
+    <div class="status" id="statusLine"></div>
+  </div>
+  <div class="pages-wrap" id="pagesWrap"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+
+$('autoCenter').addEventListener('change', () => {
+  $('manualMarginRow').style.display = $('autoCenter').checked ? 'none' : 'flex';
+});
+
+// Aus der PDF-Vorlage ausgemessen: 7 x 27 Etiketten, Teilung 27,9 / 10,0 mm,
+// Rand 8,6 mm seitlich und 13,5 mm oben/unten. Der Bogen wird hier als
+// EIN Abschnitt von 192,8 x 270 mm beschrieben (7*25,4+6*2,5 bzw. 27*10),
+// den "Automatisch zentrieren" genau auf diese Raender setzt.
+const PRESETS = {
+  herma4333: {
+    pageW:210, pageH:297,
+    secW:192.8, secH:270, secRows:1, secGapY:0,
+    labW:25.4, labH:10, gapX:2.5, gapY:0,
+    labRadius:1.1,                // Eckradius aus dem Vektorpfad der Vorlage (3,085 pt)
+    autoCenter:true, count:189
+  },
+  bogen4: {
+    pageW:210, pageH:297,
+    secW:208, secH:73.5, secRows:4, secGapY:0,
+    labW:25.4, labH:10, gapX:0.3, gapY:0.3,
+    labRadius:0,
+    autoCenter:true, count:224
+  }
+};
+
+function applyPreset(name){
+  $('preset').value = name;       // auch bei programmatischem Aufruf synchron halten
+  const p = PRESETS[name];
+  if (!p) return;                 // "custom" laesst alle Werte stehen
+  for (const [k, v] of Object.entries(p)){
+    const el = $(k);
+    if (!el) continue;
+    if (el.type === 'checkbox') el.checked = v; else el.value = v;
+  }
+  $('manualMarginRow').style.display = $('autoCenter').checked ? 'none' : 'flex';
+  render();
+}
+
+$('preset').addEventListener('change', () => applyPreset($('preset').value));
+
+// Optionen, die nur das Aussehen betreffen, direkt durchzeichnen
+['showBorder','showGuides','showText','stackPrefix','fitPrintable'].forEach(id => {
+  $(id).addEventListener('change', render);
+});
+
+function computeLayout(){
+  const pageW = num('pageW'), pageH = num('pageH');
+  const secW = num('secW'), secH = num('secH');
+  const secRows = Math.max(1, parseInt($('secRows').value) || 1);
+  const secGapY = num('secGapY');
+  const labW = num('labW'), labH = num('labH');
+  const gapX = num('gapX'), gapY = num('gapY');
+
+  const safeMargin = num('safeMargin');
+  const fitPrintable = $('fitPrintable').checked;
+
+  const totalSectionsH = secRows * secH + (secRows - 1) * secGapY;
+
+  // Die Raender haengen nicht von cols/rows ab, koennen also vorab feststehen.
+  let marginLeft, marginTop;
+  if ($('autoCenter').checked){
+    marginLeft = (pageW - secW) / 2;
+    marginTop = (pageH - totalSectionsH) / 2;
+  } else {
+    marginLeft = num('marginLeft');
+    marginTop = num('marginTop');
+  }
+
+  // Abstand der aeussersten Etikettenkante zum Blattrand, je nach Spalten/Zeilen.
+  const inkX = n => {
+    const w = n * labW + (n - 1) * gapX;
+    const left = marginLeft + (secW - w) / 2;
+    return { left, right: pageW - (left + w), used: w };
+  };
+  const inkY = n => {
+    const h = n * labH + (n - 1) * gapY;
+    const top = marginTop + (secH - h) / 2;
+    return { top, bottom: pageH - (marginTop + totalSectionsH - (secH - h) / 2), used: h };
+  };
+
+  let cols = Math.max(1, Math.floor((secW + gapX) / (labW + gapX)));
+  let rows = Math.max(1, Math.floor((secH + gapY) / (labH + gapY)));
+
+  // Spalten/Zeilen so weit reduzieren, bis alles im bedruckbaren Bereich liegt.
+  if (fitPrintable && safeMargin > 0){
+    while (cols > 1){
+      const m = inkX(cols);
+      if (Math.min(m.left, m.right) >= safeMargin) break;
+      cols--;
+    }
+    while (rows > 1){
+      const m = inkY(rows);
+      if (Math.min(m.top, m.bottom) >= safeMargin) break;
+      rows--;
+    }
+  }
+
+  const mx = inkX(cols), my = inkY(rows);
+  const usedW = mx.used, usedH = my.used;
+  const freeW = Math.max(0, secW - usedW);
+  const freeH = Math.max(0, secH - usedH);
+
+  return {
+    pageW, pageH, secW, secH, secRows, secGapY,
+    labW, labH, gapX, gapY, cols, rows,
+    freeW, freeH, marginLeft, marginTop,
+    safeMargin, fitPrintable,
+    inkLeft: mx.left, inkRight: mx.right, inkTop: my.top, inkBottom: my.bottom,
+    perSection: cols * rows,
+    perPage: cols * rows * secRows
+  };
+}
+
+function updateInfo(L){
+  const box = $('infoBox');
+  let warn = '';
+  if (L.labW < 25.4 || L.labH < 10){
+    warn = `<div class="warn">Achtung: Etikett ist kleiner als 25,4 × 10 mm.</div>`;
+  }
+  if (L.marginTop < 0 || L.marginLeft < 0 || (L.pageH - (L.marginTop*2 + L.secRows*L.secH + (L.secRows-1)*L.secGapY)) < -0.5){
+    warn += `<div class="warn">Achtung: Abschnitte passen nicht auf die gewählte Seitengröße.</div>`;
+  }
+  const minInk = Math.min(L.inkLeft, L.inkRight, L.inkTop, L.inkBottom);
+  if (L.safeMargin > 0 && minInk < L.safeMargin){
+    warn += `<div class="warn">Achtung: äußere Etiketten liegen nur ${minInk.toFixed(2)} mm
+      vom Blattrand entfernt — der Drucker schneidet dort ab.
+      ${L.fitPrintable ? '' : 'Abstände verkleinern, Spalten/Zeilen reduzieren oder „Layout in bedruckbaren Bereich einpassen“ aktivieren.'}</div>`;
+  }
+  box.innerHTML = `
+    Pro Abschnitt: <b>${L.cols} × ${L.rows} = ${L.perSection}</b> Etiketten<br>
+    Pro Seite (${L.secRows} ${L.secRows === 1 ? 'Abschnitt' : 'Abschnitte'}): <b>${L.perPage}</b> Etiketten<br>
+    Restfläche pro Abschnitt: ${L.freeW.toFixed(1)} mm (B) / ${L.freeH.toFixed(1)} mm (H)<br>
+    Abstand zum Blattrand: links/rechts <b>${L.inkLeft.toFixed(2)}</b> / <b>${L.inkRight.toFixed(2)}</b> mm,
+    oben/unten <b>${L.inkTop.toFixed(2)}</b> / <b>${L.inkBottom.toFixed(2)}</b> mm
+    ${warn}`;
+}
+
+function makeQRSVG(data, sizeMM){
+  const qr = qrcode(0, 'M');
+  qr.addData(data);
+  qr.make();
+  const count = qr.getModuleCount();
+  const cell = sizeMM / count;
+  let rects = '';
+  for (let r = 0; r < count; r++){
+    for (let c = 0; c < count; c++){
+      if (qr.isDark(r, c)){
+        rects += `<rect x="${(c*cell).toFixed(3)}" y="${(r*cell).toFixed(3)}" width="${(cell+0.01).toFixed(3)}" height="${(cell+0.01).toFixed(3)}"/>`;
+      }
+    }
+  }
+  return `<svg width="${sizeMM}mm" height="${sizeMM}mm" viewBox="0 0 ${sizeMM} ${sizeMM}" xmlns="http://www.w3.org/2000/svg" style="shape-rendering:crispEdges;display:block;">${rects}</svg>`;
+}
+
+function buildParts(i){
+  const prefix = $('prefix').value;
+  const suffix = $('suffix').value;
+  const start = parseInt($('startNum').value) || 0;
+  const pad = parseInt($('padDigits').value) || 1;
+  const n = (start + i).toString().padStart(pad, '0');
+  const numberPart = `${n}${suffix}`;
+  return { prefix, numberPart, full: `${prefix}${numberPart}` };
+}
+
+function buildSerial(i){
+  return buildParts(i).full;
+}
+
+function render(){
+  const L = computeLayout();
+  updateInfo(L);
+  // Seitenbox muss exakt so gross sein wie .page-frame, sonst bricht der
+  // Bogen auf eine zweite (leere) Seite um. Frueher war hier A4 fest verdrahtet.
+  $('pageStyle').textContent = pageRule(L);
+
+  const count = Math.max(1, parseInt($('count').value) || 1);
+  const perPage = L.perPage;
+  const pages = Math.ceil(count / perPage);
+  const showText = $('showText').checked;
+  const showBorder = $('showBorder').checked;
+  const showGuides = $('showGuides').checked;
+  const labRadius = num('labRadius');
+  const stackPrefix = $('stackPrefix').checked;
+  const fontSize = num('fontSize');
+  const prefixFontSize = num('prefixFontSize');
+  const qrPad = num('qrPad');
+  const qrTemplate = $('qrTemplate').value || '{nr}';
+
+  $('statusLine').innerHTML = `<b>${count}</b> Etiketten &middot; <b>${pages}</b> Seite(n) &middot; ${perPage} pro Seite`;
+
+  const wrap = $('pagesWrap');
+  wrap.innerHTML = '';
+
+  let idx = 0;
+  for (let p = 0; p < pages; p++){
+    const caption = document.createElement('div');
+    caption.className = 'page-caption no-print';
+    caption.textContent = `Seite ${p+1} von ${pages}`;
+    wrap.appendChild(caption);
+
+    const page = document.createElement('div');
+    page.className = 'page-frame';
+    page.style.width = L.pageW + 'mm';
+    page.style.height = L.pageH + 'mm';
+
+    if (showGuides && L.safeMargin > 0){
+      const safe = document.createElement('div');
+      safe.className = 'safe-area no-print';
+      safe.style.left = L.safeMargin + 'mm';
+      safe.style.top = L.safeMargin + 'mm';
+      safe.style.width = (L.pageW - 2*L.safeMargin) + 'mm';
+      safe.style.height = (L.pageH - 2*L.safeMargin) + 'mm';
+      page.appendChild(safe);
+    }
+
+    for (let s = 0; s < L.secRows; s++){
+      const secTop = L.marginTop + s * (L.secH + L.secGapY);
+
+      if (showGuides){
+        const secOutline = document.createElement('div');
+        secOutline.className = 'section-outline';
+        secOutline.style.left = L.marginLeft + 'mm';
+        secOutline.style.top = secTop + 'mm';
+        secOutline.style.width = L.secW + 'mm';
+        secOutline.style.height = L.secH + 'mm';
+        page.appendChild(secOutline);
+      }
+
+      for (let r = 0; r < L.rows; r++){
+        for (let c = 0; c < L.cols; c++){
+          if (idx >= count) continue;
+          const parts = buildParts(idx);
+          const serial = parts.full;
+          const qrData = qrTemplate.replace('{nr}', serial);
+
+          const left = L.marginLeft + L.freeW/2 + c * (L.labW + L.gapX);
+          const top = secTop + L.freeH/2 + r * (L.labH + L.gapY);
+
+          const lab = document.createElement('div');
+          lab.className = showBorder ? 'label frame' : 'label';
+          lab.style.borderRadius = labRadius + 'mm';
+          lab.style.left = left + 'mm';
+          lab.style.top = top + 'mm';
+          lab.style.width = L.labW + 'mm';
+          lab.style.height = L.labH + 'mm';
+
+          const qrSize = Math.max(2, L.labH - 2*qrPad);
+          const qrCell = document.createElement('div');
+          qrCell.className = 'qr';
+          qrCell.style.width = qrSize + 'mm';
+          qrCell.style.height = qrSize + 'mm';
+          qrCell.style.marginLeft = qrPad + 'mm';
+          qrCell.innerHTML = makeQRSVG(qrData, qrSize);
+          lab.appendChild(qrCell);
+
+          if (showText){
+            const txt = document.createElement('div');
+            txt.className = 'txt';
+            txt.style.paddingLeft = '0.8mm';
+            txt.style.paddingRight = '0.8mm';
+
+            if (stackPrefix && parts.prefix.trim() !== ''){
+              txt.classList.add('stacked');
+
+              const pLine = document.createElement('div');
+              pLine.className = 'prefix-line';
+              pLine.style.fontSize = prefixFontSize + 'mm';
+              pLine.textContent = parts.prefix;
+              txt.appendChild(pLine);
+
+              const nLine = document.createElement('div');
+              nLine.className = 'number-line';
+              nLine.style.fontSize = fontSize + 'mm';
+              nLine.textContent = parts.numberPart;
+              txt.appendChild(nLine);
+            } else {
+              txt.style.fontSize = fontSize + 'mm';
+              txt.textContent = serial;
+            }
+
+            lab.appendChild(txt);
+          }
+
+          page.appendChild(lab);
+          idx++;
+        }
+      }
+    }
+    wrap.appendChild(page);
+  }
+}
+
+// Die Regeln fuer Bogen und Etikett stehen doppelt (Hauptseite + Druck-Tab).
+// Genau diese Doppelung war die Fehlerquelle: im Druck-Tab fehlte
+// .section-outline{position:absolute}, wodurch die Abschnittsrahmen in den
+// Textfluss rutschten und 294 mm der 297 mm Seitenhoehe belegten.
+// Deshalb wird das Druck-CSS jetzt aus einer einzigen Funktion erzeugt.
+function pageRule(L){
+  return `@page{size:${L.pageW}mm ${L.pageH}mm; margin:0;}`;
+}
+
+function sheetCSS(L){
+  return `
+    *{box-sizing:border-box;}
+    body{margin:0;background:#fff;}
+    .pages-wrap{display:block;}
+    .page-frame{position:relative; background:#fff; margin:0;}
+    /* Umbruch nur ZWISCHEN Bogen; zwischen zwei .page-frame steht die
+       .page-caption, deshalb ~ statt +. Ein break-after auf dem letzten
+       Bogen erzeugt in WebKit eine leere Folgeseite. */
+    .page-frame ~ .page-frame{break-before:page; page-break-before:always;}
+    .page-caption{display:none;}
+    .safe-area{display:none;}
+    .section-outline{position:absolute; border:none;}
+    .label{
+      position:absolute;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      overflow:hidden;
+      outline:none;
+    }
+    .label.frame{outline:0.3mm solid #000; outline-offset:-0.15mm;}
+    .label .qr{flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+    .label .txt{
+      flex:1;display:flex;align-items:center;justify-content:center;
+      font-family:"Consolas","Courier New",monospace;font-weight:600;
+      line-height:1;letter-spacing:.2px;white-space:nowrap;overflow:hidden;
+    }
+    .label .txt.stacked{flex-direction:column;align-items:center;justify-content:center;gap:0.4mm;}
+    .label .txt .prefix-line{font-weight:500;letter-spacing:.4px;line-height:1;}
+    .label .txt .number-line{font-weight:700;line-height:1;}
+    ${pageRule(L)}
+  `;
+}
+
+function fillMax(){
+  const L = computeLayout();
+  $('count').value = L.perPage;
+  render();
+}
+
+function openPrintTab(){
+  // Immer den aktuellen Eingabestand drucken - die Live-Listener aktualisieren
+  // nur die Infobox, nicht die Vorschau.
+  render();
+
+  const L = computeLayout();
+  const pagesHTML = $('pagesWrap').innerHTML;
+  const printCSS = sheetCSS(L);
+
+  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<title>Etiketten – Druckvorschau</title>
+<style>
+${printCSS}
+.print-instructions{
+  background:#fff3cd;
+  border-bottom:2px solid #e0a800;
+  padding:14px 18px;
+  font-family:Arial, Helvetica, sans-serif;
+  font-size:14px;
+  color:#3a2e00;
+}
+.print-instructions h2{margin:0 0 8px; font-size:15px;}
+.print-instructions ol{margin:0 0 10px; padding-left:20px; line-height:1.6;}
+.print-instructions b{color:#8a6300;}
+.print-instructions .safari{margin:0 0 10px; line-height:1.6;}
+.print-instructions button{
+  background:#2a5d63; color:#fff; border:none; border-radius:5px;
+  padding:9px 16px; font-size:14px; font-weight:600; cursor:pointer;
+}
+.print-instructions button:hover{background:#204a4f;}
+@media print{ .print-instructions{display:none !important;} }
+</style></head>
+<body>
+<div class="print-instructions">
+  <h2>Vor dem Drucken im Dialog bitte prüfen:</h2>
+  <ol>
+    <li>Papierformat: <b>${L.pageW} &times; ${L.pageH} mm</b></li>
+    <li>Ränder: <b>Keine / 0</b> (nicht "Standard")</li>
+    <li>Skalierung: <b>100&nbsp;%</b> — "An Papierformat anpassen" / "Fit to page" <b>deaktivieren</b></li>
+    <li>Kopf- und Fußzeilen: <b>Aus</b></li>
+  </ol>
+  <p class="safari"><b>Safari:</b> Safari ignoriert die Seitengröße aus dem Dokument und
+  verkleinert den Bogen automatisch — dann sitzen die Etiketten zu hoch auf dem Blatt und
+  die Maße stimmen nicht mehr. Im Druckdialog "Weitere Optionen" öffnen,
+  <b>Skalierung 100&nbsp;%</b> wählen und <b>"Auf Papiergröße anpassen" abschalten</b>.
+  Für maßhaltigen Druck ist <b>Chrome</b> (Ränder: Keine, Skalierung 100&nbsp;%) zuverlässiger.</p>
+  <button onclick="window.print()">Jetzt drucken</button>
+</div>
+${pagesHTML}
+</body></html>`;
+
+  // Direkt in das neue Fenster schreiben statt ueber eine blob:-URL:
+  // Safari behandelt blob:-Dokumente in neuen Tabs unzuverlaessig, und die
+  // blob-URL wurde vorher nach 30 s ungueltig.
+  const win = window.open('', '_blank');
+
+  if (!win){
+    alert('Das Öffnen in einem neuen Tab wurde blockiert.\n\nBitte Pop-ups für diese Seite erlauben, oder die HTML-Datei herunterladen und direkt (nicht in der Vorschau) im Browser öffnen. Dort funktioniert Strg+P / Cmd+P zuverlässig.');
+    return;
+  }
+
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
+
+$('generateBtn').addEventListener('click', render);
+$('fillMaxBtn').addEventListener('click', fillMax);
+$('printBtn').addEventListener('click', openPrintTab);
+
+// Live-Update bei Änderungen
+const GEOMETRY_FIELDS = ['pageW','pageH','secW','secH','secRows','secGapY','labW','labH','gapX','gapY','labRadius'];
+document.querySelectorAll('input').forEach(el => {
+  el.addEventListener('input', () => {
+    // Wer die Bogenmasse von Hand aendert, arbeitet nicht mehr nach Vorlage.
+    if (GEOMETRY_FIELDS.includes(el.id)) $('preset').value = 'custom';
+    const L = computeLayout();
+    updateInfo(L);
+  });
+});
+
+// Initial
+render();
+</script>
+</body>
+</html>
