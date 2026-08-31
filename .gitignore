@@ -3,3 +3,6 @@
 
 # macOS
 .DS_Store
+
+# Worktrees des Harness
+.claude/worktrees/
