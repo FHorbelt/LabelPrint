@@ -78,41 +78,6 @@ export function pageRule(L) {
   return `@page{size:${L.pageW}mm ${L.pageH}mm; margin:0;}`;
 }
 
-export function sheetCSS(L) {
-  return `
-    *{box-sizing:border-box;}
-    body{margin:0;background:#fff;}
-    .pages-wrap{display:block;}
-    .page-frame{position:relative; background:#fff; margin:0;}
-    /* Umbruch nur ZWISCHEN Bogen; zwischen zwei .page-frame steht die
-       .page-caption, deshalb ~ statt +. Ein break-after auf dem letzten
-       Bogen erzeugt in WebKit eine leere Folgeseite. */
-    .page-frame ~ .page-frame{break-before:page; page-break-before:always;}
-    .page-caption{display:none;}
-    .safe-area{display:none;}
-    .section-outline{position:absolute; border:none;}
-    .label{
-      position:absolute;
-      background:#fff;
-      display:flex;
-      align-items:center;
-      overflow:hidden;
-      outline:none;
-    }
-    .label.frame{outline:0.3mm solid #000; outline-offset:-0.15mm;}
-    .label .qr{flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
-    .label .txt{
-      flex:1;display:flex;align-items:center;justify-content:center;
-      font-family:"Consolas","Courier New",monospace;font-weight:600;
-      line-height:1;letter-spacing:.2px;white-space:nowrap;overflow:hidden;
-    }
-    .label .txt.stacked{flex-direction:column;align-items:center;justify-content:center;gap:0.4mm;}
-    .label .txt .prefix-line{font-weight:500;letter-spacing:.4px;line-height:1;}
-    .label .txt .number-line{font-weight:700;line-height:1;}
-    ${pageRule(L)}
-  `;
-}
-
 // Seriennummer eines Etiketts. i ist der Index ab 0.
 //
 // Der QR-Inhalt (`full`) und die Aufschrift sind bewusst entkoppelt: der Code

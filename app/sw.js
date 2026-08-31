@@ -2,7 +2,7 @@
 // weil auch die QR-Bibliothek lokal liegt.
 // Bei jeder Aenderung an den Dateien die Versionsnummer erhoehen.
 
-const CACHE = 'asn-v2';
+const CACHE = 'asn-v3';
 
 const SCHALE = [
   './',
@@ -14,7 +14,6 @@ const SCHALE = [
   './js/presets.js',
   './js/store.js',
   './js/render.js',
-  './js/print.js',
   './vendor/qrcode.min.js',
   './manifest.webmanifest',
   './icons/icon-192.png',

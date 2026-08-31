@@ -2,7 +2,6 @@ import { computeLayout, pageRule } from './sheet.js';
 import { DEFAULTS, BUILTIN, applyTemplate } from './presets.js';
 import { createStore } from './store.js';
 import { renderSheets } from './render.js';
-import { openPrintTab } from './print.js';
 import { FIELDS, readForm, writeForm, validate, showProblems, setTheme } from './ui.js';
 
 const $ = (id) => document.getElementById(id);
@@ -114,14 +113,12 @@ const zeichneVerzoegert = () => {
 function drucke() {
   if (druckGesperrt) return;
   const s = letzteGueltige || readForm();
-  const L = computeLayout(s);
 
-  const geoeffnet = openPrintTab(L, $('pagesWrap').innerHTML);
-  if (!geoeffnet) {
-    setzeDruckSperre(false,
-      'Das Öffnen des Druck-Tabs wurde blockiert. Bitte Pop-ups für diese Seite erlauben.');
-    return;
-  }
+  // Direkt aus dieser Seite drucken. Die Regeln dafuer stehen im
+  // @media-print-Block von app.css; ein zweites Dokument braucht es nicht —
+  // das ersparte einen neuen Tab und damit Pop-up-Blocker und Safaris
+  // unzuverlaessigen Umgang mit fremden Fenstern.
+  window.print();
 
   const von = parseInt(s.startNum, 10) || 0;
   const anzahl = Math.max(1, parseInt(s.count, 10) || 1);

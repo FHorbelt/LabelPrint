@@ -50,6 +50,18 @@ Für maßhaltigen Druck **Chrome** verwenden, Ränder auf „Keine", Skalierung
 100 %. Safari ignoriert die Seitengröße aus dem Dokument und verkleinert
 automatisch — die Etiketten sitzen dann zu hoch und die Maße stimmen nicht.
 
+Der Drucken-Knopf löst den Druckdialog direkt aus dieser Seite aus. Was
+gedruckt wird, steuert allein der `@media print`-Block in `app/css/app.css`;
+`test/geometry.test.mjs` sichert dessen entscheidende Regeln ab.
+
+## Nach Änderungen an der App
+
+**Die Cache-Version in `app/sw.js` erhöhen.** Der Service Worker bedient
+cache-first. Bleibt die Version stehen, liefert er weiter die alte Fassung aus
+— und weil der Browser nur ein geändertes `sw.js` als neue Version erkennt,
+erscheint dann auch die Leiste „Neue Version verfügbar" nicht. Wer die Nummer
+vergisst, sieht seine eigene Änderung nicht.
+
 ## Bekannte Einschränkungen
 
 **Gedruckter Rahmen.** Die Option „Rahmen mitdrucken" (standardmäßig aus)
@@ -79,7 +91,6 @@ warnt die App und zeigt den gemessenen Außenrand dauerhaft über der Vorschau.
     app/js/presets.js       Vorlagen
     app/js/store.js         localStorage
     app/js/render.js        Zeichnen, QR mit Cache
-    app/js/print.js         Druckdokument
     app/js/ui.js            Formular ↔ Zustand
     app/js/main.js          Verdrahtung
     docs/superpowers/       Spec und Implementierungsplan

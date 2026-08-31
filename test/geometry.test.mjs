@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeLayout, pageRule, sheetCSS } from '../app/js/sheet.js';
+import { readFileSync } from 'node:fs';
+import { computeLayout, pageRule } from '../app/js/sheet.js';
 import { DEFAULTS, BUILTIN } from '../app/js/presets.js';
 
 const nah = (ist, soll, tol = 0.01) =>
@@ -81,11 +82,18 @@ test('Manuelle Raender ueberschreiben das Zentrieren', () => {
   assert.equal(L.marginTop, 20);
 });
 
-test('Druck-Stylesheet enthaelt die entscheidenden Regeln', () => {
-  const css = sheetCSS(computeLayout(mit('herma4333')));
-  assert.match(css, /\.page-frame ~ \.page-frame\{break-before:page/);
-  assert.match(css, /\.section-outline\{position:absolute; border:none;\}/);
-  assert.match(css, /\.safe-area\{display:none;\}/);
-  assert.match(css, /\.label\.frame\{outline:0\.3mm solid #000; outline-offset:-0\.15mm;\}/);
-  assert.match(css, /@page\{size:210mm 297mm; margin:0;\}/);
+test('Druckregeln in app.css: das Blatt allein, ohne Bedienelemente', () => {
+  const css = readFileSync(new URL('../app/css/app.css', import.meta.url), 'utf8');
+  const block = css.slice(css.indexOf('@media print'));
+  assert.ok(block.length > 0, '@media print fehlt');
+  // Seit der Druck direkt aus der Seite laeuft, sind diese Regeln die einzige
+  // Quelle fuer das Druckbild — vorher standen sie doppelt in sheetCSS.
+  assert.match(block, /\.topbar, \.sidebar, \.tools, \.history, \.update-bar, \.page-caption\{display:none !important;\}/);
+  assert.match(block, /\.page-frame ~ \.page-frame\{break-before:page; page-break-before:always;\}/);
+  assert.match(block, /\.section-outline\{border:none;\}/);
+  assert.match(block, /\.safe-area\{display:none;\}/);
+  assert.match(block, /\.label\{outline:none;\}/);
+  assert.match(block, /\.label\.frame\{outline:0\.3mm solid #000; outline-offset:-0\.15mm;\}/);
+  assert.match(block, /\.pages-wrap\{display:block; gap:0; transform:none !important;\}/,
+    'Der Zoom der Vorschau darf nicht mitgedruckt werden');
 });

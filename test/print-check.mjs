@@ -6,7 +6,7 @@
 // ein Dateipfad reicht nicht, weil ES-Module ueber file:// blockiert sind.
 
 import { execFileSync, spawn } from 'node:child_process';
-import { writeFileSync, rmSync, mkdtempSync } from 'node:fs';
+import { writeFileSync, readFileSync, rmSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -96,6 +96,27 @@ try {
   nah(m.radiusPx, 1.1 * 96 / 25.4, 0.1, 'Eckenradius');
   assert.equal(m.kontur, 'rgb(111, 110, 110)', 'Konturfarbe #6F6E6E');
   assert.equal(m.seitenBox, '@page{size:210mm 297mm; margin:0;}', 'Seitenbox');
+
+  // Zweiter Teil: seit der Druck direkt aus der Seite laeuft, wird er hier
+  // auch wirklich erzeugt. Prueft, dass der @media-print-Block das Blatt
+  // allein uebrig laesst und die Seitenbox stimmt.
+  const pdfDatei = join(mkdtempSync(join(tmpdir(), 'asn-')), 'druck.pdf');
+  execFileSync(CHROME, [
+    '--headless=new', '--disable-gpu', '--no-pdf-header-footer',
+    '--virtual-time-budget=25000', `--print-to-pdf=${pdfDatei}`,
+    `http://127.0.0.1:${PORT}/index.html`
+  ], { stdio: 'ignore' });
+
+  const pdf = readFileSync(pdfDatei);
+  const seiten = pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) || [];
+  const boxen = new Set((pdf.toString('latin1').match(/\/MediaBox\s*\[([^\]]*)\]/g) || []));
+  rmSync(pdfDatei, { force: true });
+
+  console.log('Gedruckt:', { seiten: seiten.length, mediaBox: [...boxen] });
+  assert.equal(seiten.length, 1, 'gedruckte Seitenzahl');
+  assert.equal(boxen.size, 1, 'einheitliche Seitenbox');
+  // 210 x 297 mm in Punkt, mit der Rundung, die Chrome erzeugt
+  assert.match([...boxen][0], /594\.9\d* 841\.9\d*/, 'Seitenbox ist A4 hoch');
 
   console.log('Druckabnahme bestanden.');
 } finally {
