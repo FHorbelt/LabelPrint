@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASN-Drucker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f2d31">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/app.css">
+<style id="pageStyle"></style>
+</head>
+<body>
+
+<div id="updateBar" class="update-bar" hidden>
+  Neue Version verfügbar — <button type="button" id="reloadBtn">neu laden</button>
+</div>
+
+<header class="topbar">
+  <span class="brand">ASN-Drucker</span>
+
+  <div class="preset-wrap">
+    <button type="button" id="preset" class="preset-btn" aria-haspopup="menu" aria-expanded="false">
+      <span id="presetName">HERMA 4243/4244/4333</span> <span aria-hidden="true">▾</span>
+    </button>
+    <div id="presetMenu" class="menu" role="menu" hidden></div>
+  </div>
+
+  <span class="spacer"></span>
+  <span class="status" id="statusLine"></span>
+  <button type="button" id="themeBtn" class="icon-btn" title="Hell / Dunkel">◐</button>
+  <button type="button" id="printBtn" class="primary">Drucken</button>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+
+    <section class="status-card" id="statusCard">
+      <div class="k">Weiter bei</div>
+      <div class="v" id="nextAsn">AR-000001</div>
+      <div class="m"><span id="lastRun">noch nichts gedruckt</span>
+        · <button type="button" class="linklike" id="historyLink">Verlauf</button></div>
+    </section>
+
+    <details class="group" open>
+      <summary>Nummernkreis</summary>
+      <div class="fields">
+        <div class="row">
+          <label>Präfix<input type="text" id="prefix"></label>
+          <label>Suffix<input type="text" id="suffix"></label>
+        </div>
+        <div class="row">
+          <label>Startnummer<input type="number" id="startNum" step="1"></label>
+          <label>Stellen<input type="number" id="padDigits" step="1" min="1"></label>
+        </div>
+        <div class="row">
+          <label>Anzahl<input type="number" id="count" step="1" min="1"></label>
+          <button type="button" class="ghost" id="fillMaxBtn">1 Seite füllen</button>
+        </div>
+        <label class="full">QR-Inhalt <span class="hint">{nr} = Seriennummer</span>
+          <input type="text" id="qrTemplate"></label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Bogen</summary>
+      <div class="fields">
+        <div class="row">
+          <label>Seitenbreite (mm)<input type="number" id="pageW" step="0.1"></label>
+          <label>Seitenhöhe (mm)<input type="number" id="pageH" step="0.1"></label>
+        </div>
+        <div class="row">
+          <label>Abschnittsbreite (mm)<input type="number" id="secW" step="0.1"></label>
+          <label>Abschnittshöhe (mm)<input type="number" id="secH" step="0.1"></label>
+        </div>
+        <div class="row">
+          <label>Abschnitte<input type="number" id="secRows" step="1" min="1"></label>
+          <label>Abstand (mm)<input type="number" id="secGapY" step="0.05"></label>
+        </div>
+        <label class="check"><input type="checkbox" id="autoCenter"> Automatisch zentrieren</label>
+        <div class="row" id="manualMarginRow" hidden>
+          <label>Rand links (mm)<input type="number" id="marginLeft" step="0.1"></label>
+          <label>Rand oben (mm)<input type="number" id="marginTop" step="0.1"></label>
+        </div>
+        <label class="full">Nicht bedruckbarer Rand (mm)
+          <input type="number" id="safeMargin" step="0.1" min="0"></label>
+        <label class="check"><input type="checkbox" id="fitPrintable"> In bedruckbaren Bereich einpassen</label>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Etikett</summary>
+      <div class="fields">
+        <div class="row">
+          <label>Breite (mm)<input type="number" id="labW" step="0.1"></label>
+          <label>Höhe (mm)<input type="number" id="labH" step="0.1"></label>
+        </div>
+        <div class="row">
+          <label>Abstand waagerecht<input type="number" id="gapX" step="0.05"></label>
+          <label>Abstand senkrecht<input type="number" id="gapY" step="0.05"></label>
+        </div>
+        <div class="row">
+          <label>Eckenradius (mm)<input type="number" id="labRadius" step="0.1" min="0"></label>
+          <label>QR-Rand innen (mm)<input type="number" id="qrPad" step="0.1"></label>
+        </div>
+        <div class="row">
+          <label>Schrift Nummer (mm)<input type="number" id="fontSize" step="0.1"></label>
+          <label>Schrift Präfix (mm)<input type="number" id="prefixFontSize" step="0.1"></label>
+        </div>
+      </div>
+    </details>
+
+    <details class="group">
+      <summary>Darstellung</summary>
+      <div class="fields">
+        <label class="check"><input type="checkbox" id="showText"> Seriennummer als Text</label>
+        <label class="check"><input type="checkbox" id="stackPrefix"> Präfix in eigener Zeile</label>
+        <label class="check"><input type="checkbox" id="showBorder"> Rahmen mitdrucken</label>
+        <label class="check"><input type="checkbox" id="showGuides"> Hilfslinien anzeigen</label>
+      </div>
+    </details>
+
+    <div id="warnBox" class="warn" hidden></div>
+
+    <button type="button" class="primary wide" id="printBtnSide">Drucken / Als PDF</button>
+  </aside>
+
+  <section class="preview">
+    <div class="tools">
+      <button type="button" class="ghost" id="zoomOut">−</button>
+      <span id="zoom">100 %</span>
+      <button type="button" class="ghost" id="zoomIn">+</button>
+      <span id="pageCount"></span>
+      <span class="spacer"></span>
+      <span id="marginReadout"></span>
+    </div>
+    <div class="canvas"><div class="pages-wrap" id="pagesWrap"></div></div>
+    <div id="historyPanel" class="history" hidden></div>
+  </section>
+</main>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
