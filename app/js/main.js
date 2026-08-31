@@ -267,3 +267,25 @@ function start() {
 }
 
 start();
+
+// Service Worker registrieren und auf eine wartende Fassung achten.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    const zeigeLeiste = (worker) => {
+      const bar = document.getElementById('updateBar');
+      bar.hidden = false;
+      document.getElementById('reloadBtn').addEventListener('click', () => {
+        worker.postMessage('skipWaiting');
+        location.reload();
+      }, { once: true });
+    };
+    if (reg.waiting) zeigeLeiste(reg.waiting);
+    reg.addEventListener('updatefound', () => {
+      const neu = reg.installing;
+      if (!neu) return;
+      neu.addEventListener('statechange', () => {
+        if (neu.state === 'installed' && navigator.serviceWorker.controller) zeigeLeiste(neu);
+      });
+    });
+  }).catch(() => { /* ohne Service Worker laeuft die App trotzdem */ });
+}
