@@ -31,10 +31,13 @@ scheitert ab Node 24, weil der Pfad als Modul aufgelöst wird.
 
 ## Wichtig
 
-Die Maße in `app/js/sheet.js` und `app/js/presets.js` sind gegen die
-HERMA-Stanzvorlage vermessen (`Etiketten-Vorlage-HERMA-25-4x10-blanko.pdf`).
-Änderungen dort müssen `test/geometry.test.mjs` bestehen. Verbindlich für die
-Vorlage HERMA 4243/4244/4333:
+Die Maße in `app/js/sheet.js` und `app/js/presets.js` sind gegen HERMAs
+Stanzvorlage für 4243/4244/4333 vermessen. Die Vorlage selbst liegt **nicht**
+im Repository — sie ist HERMAs Material und wird zum Betrieb nicht gebraucht;
+die daraus gewonnenen Maße stehen unten, im Code und in den Tests. Wer
+nachmessen will, lädt sie bei HERMA herunter.
+
+Änderungen an den Maßen müssen `test/geometry.test.mjs` bestehen. Verbindlich:
 
 | Größe | Sollwert |
 |---|---|

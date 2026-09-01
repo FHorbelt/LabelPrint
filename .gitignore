@@ -6,3 +6,6 @@
 
 # Worktrees des Harness
 .claude/worktrees/
+
+# HERMAs Stanzvorlage: fremdes Material, bleibt lokal
+Etiketten-Vorlage-HERMA-*.pdf
