@@ -29,22 +29,22 @@ test('leerer Speicher: naechste ASN ist 1', () => {
 
 test('Lauf eintragen schreibt den Zaehler fort', () => {
   const s = createStore(fakeStorage());
-  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'herma4333' });
+  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'bogen189' });
   assert.equal(s.nextAsn(), 190);
   assert.equal(s.listRuns().length, 1);
 });
 
 test('Zaehler folgt der hoechsten Nummer, nicht der Reihenfolge', () => {
   const s = createStore(fakeStorage());
-  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 500, to: 520, count: 21, template: 'herma4333' });
-  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 1, to: 10, count: 10, template: 'herma4333' });
+  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 500, to: 520, count: 21, template: 'bogen189' });
+  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 1, to: 10, count: 10, template: 'bogen189' });
   assert.equal(s.nextAsn(), 521);
 });
 
 test('Rueckgaengig entfernt den letzten Lauf und setzt den Zaehler zurueck', () => {
   const s = createStore(fakeStorage());
-  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'herma4333' });
-  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 190, to: 378, count: 189, template: 'herma4333' });
+  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'bogen189' });
+  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 190, to: 378, count: 189, template: 'bogen189' });
   const weg = s.undoLastRun();
   assert.equal(weg.from, 190);
   assert.equal(s.nextAsn(), 190);
@@ -59,7 +59,7 @@ test('Rueckgaengig auf leerer Historie liefert null', () => {
 test('Historie ist auf 200 Laeufe begrenzt', () => {
   const s = createStore(fakeStorage());
   for (let i = 0; i < 205; i++) {
-    s.addRun({ ts: i, prefix: 'AR-', suffix: '', from: i * 10 + 1, to: i * 10 + 10, count: 10, template: 'herma4333' });
+    s.addRun({ ts: i, prefix: 'AR-', suffix: '', from: i * 10 + 1, to: i * 10 + 10, count: 10, template: 'bogen189' });
   }
   const runs = s.listRuns();
   assert.equal(runs.length, 200);

@@ -9,24 +9,24 @@ const nah = (ist, soll, tol = 0.01) =>
 
 const mit = (id) => ({ ...DEFAULTS, ...BUILTIN[id] });
 
-test('HERMA-Vorlage ergibt 7 x 27 = 189 Etiketten', () => {
-  const L = computeLayout(mit('herma4333'));
+test('Vorlage 189 ergibt 7 x 27 = 189 Etiketten', () => {
+  const L = computeLayout(mit('bogen189'));
   assert.equal(L.cols, 7);
   assert.equal(L.rows, 27);
   assert.equal(L.perSection, 189);
   assert.equal(L.perPage, 189);
 });
 
-test('HERMA-Vorlage: Aussenraender 8,60 und 13,50 mm', () => {
-  const L = computeLayout(mit('herma4333'));
+test('Vorlage 189: Aussenraender 8,60 und 13,50 mm', () => {
+  const L = computeLayout(mit('bogen189'));
   nah(L.inkLeft, 8.6);
   nah(L.inkRight, 8.6);
   nah(L.inkTop, 13.5);
   nah(L.inkBottom, 13.5);
 });
 
-test('HERMA-Vorlage: erste und letzte Etikettenecke', () => {
-  const s = mit('herma4333');
+test('Vorlage 189: erste und letzte Etikettenecke', () => {
+  const s = mit('bogen189');
   const L = computeLayout(s);
   const ersteLinks = L.marginLeft + L.freeW / 2;
   const ersteOben  = L.marginTop  + L.freeH / 2;
@@ -40,17 +40,17 @@ test('HERMA-Vorlage: erste und letzte Etikettenecke', () => {
   nah(letzteUnten, 283.5);
 });
 
-test('HERMA-Vorlage: Teilung 27,9 und 10,0 mm', () => {
-  const s = mit('herma4333');
+test('Vorlage 189: Teilung 27,9 und 10,0 mm', () => {
+  const s = mit('bogen189');
   nah(s.labW + s.gapX, 27.9);
   nah(s.labH + s.gapY, 10.0);
 });
 
 test('Seitenbox folgt den Seitenmassen, nicht fest A4', () => {
-  const L1 = computeLayout(mit('herma4333'));
+  const L1 = computeLayout(mit('bogen189'));
   assert.equal(pageRule(L1), '@page{size:210mm 297mm; margin:0;}');
 
-  const L2 = computeLayout({ ...mit('herma4333'), pageH: 148, secH: 140, secRows: 1 });
+  const L2 = computeLayout({ ...mit('bogen189'), pageH: 148, secH: 140, secRows: 1 });
   assert.equal(pageRule(L2), '@page{size:210mm 148mm; margin:0;}');
 });
 
@@ -71,13 +71,13 @@ test('Einpassen mit 4,2 mm reduziert den alten Bogen auf 7 x 6', () => {
 });
 
 test('Einpassen bleibt wirkungslos, wenn schon genug Rand da ist', () => {
-  const L = computeLayout({ ...mit('herma4333'), fitPrintable: true, safeMargin: 4.2 });
+  const L = computeLayout({ ...mit('bogen189'), fitPrintable: true, safeMargin: 4.2 });
   assert.equal(L.cols, 7);
   assert.equal(L.rows, 27);
 });
 
 test('Manuelle Raender ueberschreiben das Zentrieren', () => {
-  const L = computeLayout({ ...mit('herma4333'), autoCenter: false, marginLeft: 5, marginTop: 20 });
+  const L = computeLayout({ ...mit('bogen189'), autoCenter: false, marginLeft: 5, marginTop: 20 });
   assert.equal(L.marginLeft, 5);
   assert.equal(L.marginTop, 20);
 });
@@ -98,8 +98,8 @@ test('Druckregeln in app.css: das Blatt allein, ohne Bedienelemente', () => {
     'Der Zoom der Vorschau darf nicht mitgedruckt werden — weder transform noch zoom');
 });
 
-test('Ueberschrift passt in den freien Streifen der HERMA-Vorlage', () => {
-  const s = mit('herma4333');
+test('Ueberschrift passt in den freien Streifen der Vorlage 189', () => {
+  const s = mit('bogen189');
   const L = computeLayout(s);
   nah(L.inkTop, 13.5);                       // 13,5 mm frei ueber der ersten Reihe
   assert.equal(headingFits(L, { ...s, heading: 'Ordner 3', headingSize: 4 }), true);
@@ -123,7 +123,7 @@ test('Ohne Ueberschrift gibt es nichts zu beanstanden', () => {
 });
 
 test('Hoehenkorrektur 0 ergibt exakt die bisherigen Positionen', () => {
-  const s = mit('herma4333');
+  const s = mit('bogen189');
   const L = computeLayout(s);
   nah(labelTop(L, s, 0, 0), 13.5);
   nah(labelTop(L, s, 0, 26), 273.5);
@@ -134,21 +134,21 @@ test('Hoehenkorrektur 0 ergibt exakt die bisherigen Positionen', () => {
 });
 
 test('Minus 0,5 mm zieht die unterste Reihe um genau 0,5 mm hoch', () => {
-  const s = { ...mit('herma4333'), heightAdjust: -0.5 };
+  const s = { ...mit('bogen189'), heightAdjust: -0.5 };
   const L = computeLayout(s);
   nah(labelTop(L, s, 0, 0), 13.5, 0.001);     // oberste Reihe bleibt fest
   nah(labelTop(L, s, 0, 26), 273.0, 0.001);
 });
 
 test('Plus 1 mm schiebt die unterste Reihe um genau 1 mm nach unten', () => {
-  const s = { ...mit('herma4333'), heightAdjust: 1 };
+  const s = { ...mit('bogen189'), heightAdjust: 1 };
   const L = computeLayout(s);
   nah(labelTop(L, s, 0, 0), 13.5, 0.001);
   nah(labelTop(L, s, 0, 26), 274.5, 0.001);
 });
 
 test('Die Korrektur verteilt sich gleichmaessig ueber die Reihen', () => {
-  const s = { ...mit('herma4333'), heightAdjust: -2.6 };   // 0,1 mm je Zeilenabstand
+  const s = { ...mit('bogen189'), heightAdjust: -2.6 };   // 0,1 mm je Zeilenabstand
   const L = computeLayout(s);
   nah(labelTop(L, s, 0, 13), 13.5 + 13 * (10 - 0.1), 0.001);
   nah(labelTop(L, s, 0, 26), 273.5 - 2.6, 0.001);
@@ -165,7 +165,7 @@ test('Mehrere Abschnitte: die Korrektur wirkt ueber den ganzen Block', () => {
 });
 
 test('Breitenkorrektur 0 und Versatz 0 ergeben die bisherigen Positionen', () => {
-  const s = mit('herma4333');
+  const s = mit('bogen189');
   const L = computeLayout(s);
   nah(labelLeft(L, s, 0), 8.6);
   nah(labelLeft(L, s, 6), 176.0);
@@ -175,7 +175,7 @@ test('Breitenkorrektur 0 und Versatz 0 ergeben die bisherigen Positionen', () =>
 });
 
 test('Breitenkorrektur laesst die linke Spalte fest', () => {
-  const s = { ...mit('herma4333'), widthAdjust: -0.6 };
+  const s = { ...mit('bogen189'), widthAdjust: -0.6 };
   const L = computeLayout(s);
   nah(labelLeft(L, s, 0), 8.6, 0.001);
   nah(labelLeft(L, s, 6), 175.4, 0.001);
@@ -183,14 +183,14 @@ test('Breitenkorrektur laesst die linke Spalte fest', () => {
 });
 
 test('Versatz waagerecht verschiebt alle Spalten gleich', () => {
-  const s = { ...mit('herma4333'), offsetX: 0.3 };
+  const s = { ...mit('bogen189'), offsetX: 0.3 };
   const L = computeLayout(s);
   nah(labelLeft(L, s, 0), 8.9, 0.001);
   nah(labelLeft(L, s, 6), 176.3, 0.001);
 });
 
 test('Versatz und Breitenkorrektur wirken zusammen', () => {
-  const s = { ...mit('herma4333'), offsetX: 0.3, widthAdjust: -0.6 };
+  const s = { ...mit('bogen189'), offsetX: 0.3, widthAdjust: -0.6 };
   const L = computeLayout(s);
   nah(labelLeft(L, s, 0), 8.9, 0.001);
   nah(labelLeft(L, s, 6), 175.7, 0.001);

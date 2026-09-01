@@ -11,7 +11,7 @@ const store = createStore();
 let laufendesZeichnen = null;
 let letzteGueltige = null;
 let druckGesperrt = false;
-let aktiveVorlage = 'herma4333';
+let aktiveVorlage = 'bogen189';
 
 const asnText = (s, nr) =>
   `${s.prefix}${String(nr).padStart(Math.max(1, parseInt(s.padDigits, 10) || 1), '0')}${s.suffix}`;

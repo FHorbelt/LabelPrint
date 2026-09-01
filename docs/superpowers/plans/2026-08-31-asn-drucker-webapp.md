@@ -34,7 +34,7 @@ Druckabnahme.
   erzwingt.
 - **Oberfläche auf Deutsch.**
 - **Node 18 oder neuer** für `node --test` (nur Entwicklung, nicht Laufzeit).
-- **Die Geometrie ist unveränderlich.** Für die Vorlage HERMA 4243/4244/4333
+- **Die Geometrie ist unveränderlich.** Für die Vorlage 189 × 25,4 × 10 mm
   gilt verbindlich: Raster 7 × 27 = 189, Etikett 25,4 × 10 mm, Teilung
   27,9 / 10,0 mm, Abstände 2,5 / 0 mm, erste Etikettenecke 8,60 / 13,50 mm,
   letzte 201,40 / 283,49 mm, Ränder außen 8,60 mm seitlich und 13,50 mm
@@ -70,7 +70,7 @@ Druckabnahme.
 ### Task 1: Geometriekern mit festgeschriebenen Abnahmewerten
 
 Zuerst die Tests, dann das Modul. Die Werte stammen aus der Vermessung der
-HERMA-Vorlage und sind das Sicherheitsnetz für den gesamten weiteren Umbau.
+Vorlage 189 und sind das Sicherheitsnetz für den gesamten weiteren Umbau.
 
 **Files:**
 - Create: `test/geometry.test.mjs`
@@ -103,24 +103,24 @@ const nah = (ist, soll, tol = 0.01) =>
 
 const mit = (id) => ({ ...DEFAULTS, ...BUILTIN[id] });
 
-test('HERMA-Vorlage ergibt 7 x 27 = 189 Etiketten', () => {
-  const L = computeLayout(mit('herma4333'));
+test('Vorlage 189 ergibt 7 x 27 = 189 Etiketten', () => {
+  const L = computeLayout(mit('bogen189'));
   assert.equal(L.cols, 7);
   assert.equal(L.rows, 27);
   assert.equal(L.perSection, 189);
   assert.equal(L.perPage, 189);
 });
 
-test('HERMA-Vorlage: Aussenraender 8,60 und 13,50 mm', () => {
-  const L = computeLayout(mit('herma4333'));
+test('Vorlage 189: Aussenraender 8,60 und 13,50 mm', () => {
+  const L = computeLayout(mit('bogen189'));
   nah(L.inkLeft, 8.6);
   nah(L.inkRight, 8.6);
   nah(L.inkTop, 13.5);
   nah(L.inkBottom, 13.5);
 });
 
-test('HERMA-Vorlage: erste und letzte Etikettenecke', () => {
-  const s = mit('herma4333');
+test('Vorlage 189: erste und letzte Etikettenecke', () => {
+  const s = mit('bogen189');
   const L = computeLayout(s);
   const ersteLinks = L.marginLeft + L.freeW / 2;
   const ersteOben  = L.marginTop  + L.freeH / 2;
@@ -134,17 +134,17 @@ test('HERMA-Vorlage: erste und letzte Etikettenecke', () => {
   nah(letzteUnten, 283.5);
 });
 
-test('HERMA-Vorlage: Teilung 27,9 und 10,0 mm', () => {
-  const s = mit('herma4333');
+test('Vorlage 189: Teilung 27,9 und 10,0 mm', () => {
+  const s = mit('bogen189');
   nah(s.labW + s.gapX, 27.9);
   nah(s.labH + s.gapY, 10.0);
 });
 
 test('Seitenbox folgt den Seitenmassen, nicht fest A4', () => {
-  const L1 = computeLayout(mit('herma4333'));
+  const L1 = computeLayout(mit('bogen189'));
   assert.equal(pageRule(L1), '@page{size:210mm 297mm; margin:0;}');
 
-  const L2 = computeLayout({ ...mit('herma4333'), pageH: 148, secH: 140, secRows: 1 });
+  const L2 = computeLayout({ ...mit('bogen189'), pageH: 148, secH: 140, secRows: 1 });
   assert.equal(pageRule(L2), '@page{size:210mm 148mm; margin:0;}');
 });
 
@@ -165,19 +165,19 @@ test('Einpassen mit 4,2 mm reduziert den alten Bogen auf 7 x 6', () => {
 });
 
 test('Einpassen bleibt wirkungslos, wenn schon genug Rand da ist', () => {
-  const L = computeLayout({ ...mit('herma4333'), fitPrintable: true, safeMargin: 4.2 });
+  const L = computeLayout({ ...mit('bogen189'), fitPrintable: true, safeMargin: 4.2 });
   assert.equal(L.cols, 7);
   assert.equal(L.rows, 27);
 });
 
 test('Manuelle Raender ueberschreiben das Zentrieren', () => {
-  const L = computeLayout({ ...mit('herma4333'), autoCenter: false, marginLeft: 5, marginTop: 20 });
+  const L = computeLayout({ ...mit('bogen189'), autoCenter: false, marginLeft: 5, marginTop: 20 });
   assert.equal(L.marginLeft, 5);
   assert.equal(L.marginTop, 20);
 });
 
 test('Druck-Stylesheet enthaelt die entscheidenden Regeln', () => {
-  const css = sheetCSS(computeLayout(mit('herma4333')));
+  const css = sheetCSS(computeLayout(mit('bogen189')));
   assert.match(css, /\.page-frame ~ \.page-frame\{break-before:page/);
   assert.match(css, /\.section-outline\{position:absolute; border:none;\}/);
   assert.match(css, /\.safe-area\{display:none;\}/);
@@ -195,7 +195,7 @@ Expected: FAIL — `Cannot find module '.../app/js/sheet.js'`
 
 ```js
 // Voreinstellungen und mitgelieferte Bogenvorlagen.
-// Die Werte der HERMA-Vorlage sind aus der PDF-Stanzvorlage ausgemessen.
+// Die Werte der Vorlage 189 sind aus der PDF-Stanzvorlage ausgemessen.
 
 export const DEFAULTS = {
   // Bogen
@@ -215,9 +215,9 @@ export const DEFAULTS = {
 };
 
 export const BUILTIN = {
-  herma4333: {
-    id: 'herma4333',
-    name: 'HERMA 4243/4244/4333 — 25,4 × 10 mm, 189 Stück',
+  bogen189: {
+    id: 'bogen189',
+    name: '189 × 25,4 × 10 mm — 25,4 × 10 mm, 189 Stück',
     pageW: 210, pageH: 297,
     secW: 192.8, secH: 270, secRows: 1, secGapY: 0,
     labW: 25.4, labH: 10, gapX: 2.5, gapY: 0,
@@ -257,7 +257,7 @@ aus dem DOM:
 
 ```js
 // Geometrie des Etikettenbogens. Rein rechnend, kein DOM — deshalb in Node
-// testbar. Die Zahlen dieser Datei sind gegen die HERMA-Stanzvorlage vermessen;
+// testbar. Die Zahlen dieser Datei sind gegen die Stanzvorlage vermessen;
 // Aenderungen hier muessen test/geometry.test.mjs bestehen.
 
 const n = (v) => {
@@ -450,22 +450,22 @@ test('leerer Speicher: naechste ASN ist 1', () => {
 
 test('Lauf eintragen schreibt den Zaehler fort', () => {
   const s = createStore(fakeStorage());
-  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'herma4333' });
+  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'bogen189' });
   assert.equal(s.nextAsn(), 190);
   assert.equal(s.listRuns().length, 1);
 });
 
 test('Zaehler folgt der hoechsten Nummer, nicht der Reihenfolge', () => {
   const s = createStore(fakeStorage());
-  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 500, to: 520, count: 21, template: 'herma4333' });
-  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 1, to: 10, count: 10, template: 'herma4333' });
+  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 500, to: 520, count: 21, template: 'bogen189' });
+  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 1, to: 10, count: 10, template: 'bogen189' });
   assert.equal(s.nextAsn(), 521);
 });
 
 test('Rueckgaengig entfernt den letzten Lauf und setzt den Zaehler zurueck', () => {
   const s = createStore(fakeStorage());
-  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'herma4333' });
-  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 190, to: 378, count: 189, template: 'herma4333' });
+  s.addRun({ ts: 1, prefix: 'AR-', suffix: '', from: 1, to: 189, count: 189, template: 'bogen189' });
+  s.addRun({ ts: 2, prefix: 'AR-', suffix: '', from: 190, to: 378, count: 189, template: 'bogen189' });
   const weg = s.undoLastRun();
   assert.equal(weg.from, 190);
   assert.equal(s.nextAsn(), 190);
@@ -480,7 +480,7 @@ test('Rueckgaengig auf leerer Historie liefert null', () => {
 test('Historie ist auf 200 Laeufe begrenzt', () => {
   const s = createStore(fakeStorage());
   for (let i = 0; i < 205; i++) {
-    s.addRun({ ts: i, prefix: 'AR-', suffix: '', from: i * 10 + 1, to: i * 10 + 10, count: 10, template: 'herma4333' });
+    s.addRun({ ts: i, prefix: 'AR-', suffix: '', from: i * 10 + 1, to: i * 10 + 10, count: 10, template: 'bogen189' });
   }
   const runs = s.listRuns();
   assert.equal(runs.length, 200);
@@ -709,7 +709,7 @@ und Dunkel funktionieren — es wird nur noch nichts gezeichnet.
 
   <div class="preset-wrap">
     <button type="button" id="preset" class="preset-btn" aria-haspopup="menu" aria-expanded="false">
-      <span id="presetName">HERMA 4243/4244/4333</span> <span aria-hidden="true">▾</span>
+      <span id="presetName">189 × 25,4 × 10 mm</span> <span aria-hidden="true">▾</span>
     </button>
     <div id="presetMenu" class="menu" role="menu" hidden></div>
   </div>
@@ -972,7 +972,7 @@ input[aria-invalid="true"]{border-color:var(--danger);}
 .section-outline{position:absolute; border:1px dashed color-mix(in srgb, var(--muted) 45%, transparent);}
 .safe-area{position:absolute; border:1px dashed var(--danger); pointer-events:none;}
 
-/* Etikett: Stanzkontur wie in der HERMA-Vorlage, mittig auf der Schnittkante,
+/* Etikett: Stanzkontur wie in der Vorlage 189, mittig auf der Schnittkante,
    damit sich beruehrende Zeilen EINE Linie teilen. */
 .label{
   position:absolute; background:#fff; color:#000;
@@ -1492,7 +1492,7 @@ const store = createStore();
 let laufendesZeichnen = null;
 let letzteGueltige = null;
 let druckGesperrt = false;
-let aktiveVorlage = 'herma4333';
+let aktiveVorlage = 'bogen189';
 
 const asnText = (s, nr) =>
   `${s.prefix}${String(nr).padStart(Math.max(1, parseInt(s.padDigits, 10) || 1), '0')}${s.suffix}`;
@@ -1755,7 +1755,7 @@ start();
 Run: `cd app && python3 -m http.server 8099`, dann `http://localhost:8099/`.
 
 Expected:
-- Der HERMA-Bogen erscheint mit 189 Etiketten auf einer Seite.
+- Der Bogen erscheint mit 189 Etiketten auf einer Seite.
 - Über der Vorschau steht „Rand außen 8,60 / 13,50 mm".
 - Die Kopfzeile meldet „189 Etiketten · 1 Seite · 189 pro Seite".
 - Anzahl auf 500 ändern: nach kurzer Verzögerung erscheinen drei Seiten.
@@ -1964,7 +1964,7 @@ git commit -m "feat: installierbar und offline lauffaehig"
 
 ---
 
-### Task 8: Druckabnahme gegen die HERMA-Vorlage
+### Task 8: Druckabnahme gegen die Vorlage 189
 
 Die Unit-Tests sichern die Rechnung. Diese Aufgabe sichert, was tatsächlich auf
 Papier landet.
@@ -2068,7 +2068,7 @@ Diese Prüfung bleibt von Hand, weil sie ein Auge braucht:
 
 1. In der App „Rahmen mitdrucken" einschalten und drucken, Ausgabe als PDF
    sichern.
-2. Das erzeugte PDF und `Etiketten-Vorlage-HERMA-25-4x10-blanko.pdf` bei
+2. Das erzeugte PDF und `Etiketten-Vorlage-die Vorlage-25-4x10-blanko.pdf` bei
    gleicher Auflösung als Bild rendern.
 3. Übereinanderlegen und prüfen: Die Rahmen müssen auf der Stanzkontur liegen;
    die Vorlage darf nur an den abgerundeten Ecken als Haarlinie durchscheinen.
@@ -2107,7 +2107,7 @@ Lokal ausprobieren:
 ## Wichtig
 
 Die Maße in `app/js/sheet.js` und `app/js/presets.js` sind gegen die
-HERMA-Stanzvorlage vermessen. Änderungen dort müssen `test/geometry.test.mjs`
+Stanzvorlage vermessen. Änderungen dort müssen `test/geometry.test.mjs`
 bestehen.
 
 Für maßhaltigen Druck **Chrome** verwenden, Ränder auf „Keine", Skalierung

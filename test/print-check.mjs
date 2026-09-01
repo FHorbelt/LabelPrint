@@ -1,6 +1,6 @@
 // Druckabnahme: startet Headless Chrome gegen einen lokalen Server, laesst die
 // App zeichnen, misst die Etikettenpositionen im DOM und prueft sie gegen die
-// aus der HERMA-Stanzvorlage vermessenen Sollwerte.
+// aus der Stanzvorlage vermessenen Sollwerte.
 //
 // Voraussetzung: Google Chrome installiert. Der Server wird selbst gestartet;
 // ein Dateipfad reicht nicht, weil ES-Module ueber file:// blockiert sind.

@@ -151,7 +151,7 @@ input[aria-invalid="true"]{border-color:var(--danger);}
   font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 
-/* Etikett: Stanzkontur wie in der HERMA-Vorlage, mittig auf der Schnittkante,
+/* Etikett: Stanzkontur wie in der Vorlage 189, mittig auf der Schnittkante,
    damit sich beruehrende Zeilen EINE Linie teilen. */
 .label{
   position:absolute; background:#fff; color:#000;

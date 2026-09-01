@@ -6,7 +6,7 @@ Stand: 2026-08-31
 
 Der Etiketten-Generator ist heute eine einzelne HTML-Datei mit 828 Zeilen und 26
 Bedienelementen in vier gleichrangigen Blöcken. Er erzeugt maßhaltige
-QR-Etiketten für paperless-ngx-Archivnummern auf HERMA-Bogen.
+QR-Etiketten für paperless-ngx-Archivnummern auf Bogen.
 
 Er soll eine installierbare, offline lauffähige Webapp werden, die neben
 paperless-ngx auf dem Server liegt: mit fortgeführtem ASN-Zähler, eigenen
@@ -85,13 +85,13 @@ Abhängigkeiten: keine.
 Hält die mitgelieferten Vorlagen und verwaltet eigene.
 
 ```js
-BUILTIN                          // herma4333, bogen4
+BUILTIN                          // bogen189, bogen4
 listTemplates() -> Template[]    // mitgeliefert + eigene aus store
 saveTemplate(t) / deleteTemplate(id)
 applyTemplate(id) -> Settings    // Werte, die ins Formular gespielt werden
 ```
 
-Mitgeliefert bleiben die beiden bestehenden: `herma4333` (HERMA
+Mitgeliefert bleiben die beiden bestehenden: `bogen189` (die Vorlage
 4243/4244/4333) und `bogen4` (208 × 73,5 mm, 4 Abschnitte). Eigene Vorlagen
 sind dieselbe Struktur mit eigener `id` und einem Namen.
 
@@ -266,7 +266,7 @@ aktualisieren". Statt das dem Benutzer aufzubürden:
 **`test/geometry.test.mjs`** (`node --test`, ohne Browser, weil `sheet.js` rein
 rechnend ist) hält die vermessenen Werte fest:
 
-Für die Vorlage HERMA 4243/4244/4333:
+Für die Vorlage 189 × 25,4 × 10 mm:
 
 | Größe | Sollwert |
 |---|---|
@@ -289,7 +289,7 @@ Rückgängig, Begrenzung auf 200 Läufe, Verhalten bei nicht verfügbarem
 `localStorage`.
 
 **Manuelle Nachmessung** nach dem Umbau mit dem Verfahren aus der Entwicklung:
-erzeugten Bogen über `Etiketten-Vorlage-HERMA-25-4x10-blanko.pdf` legen und
+erzeugten Bogen über `Etiketten-Vorlage-die Vorlage-25-4x10-blanko.pdf` legen und
 Kontur, Linienstärke (0,3 mm), Farbe (#6F6E6E) und Eckenradius vergleichen.
 Zulässige Abweichung: 0,05 mm.
 
@@ -313,7 +313,7 @@ automatisch. Für maßhaltigen Druck bleibt Chrome die Empfehlung; der Hinweis i
 Druckdokument bleibt erhalten. Der Umbau ändert daran nichts.
 
 **Nicht bedruckbarer Rand des Druckers** bleibt eine physische Grenze. Bei der
-HERMA-Vorlage unkritisch (8,6 bzw. 13,5 mm), bei eigenen Vorlagen warnt die App.
+Vorlage 189 unkritisch (8,6 bzw. 13,5 mm), bei eigenen Vorlagen warnt die App.
 
 **`localStorage` ist an Browser und Gerät gebunden.** Nutzt du die App von
 zwei Geräten, laufen die Zähler auseinander. Bewusst in Kauf genommen, weil die

@@ -1,5 +1,5 @@
 // Voreinstellungen und mitgelieferte Bogenvorlagen.
-// Die Werte der HERMA-Vorlage sind aus der PDF-Stanzvorlage ausgemessen.
+// Die Werte der Vorlage 189 sind aus der PDF-Stanzvorlage ausgemessen.
 
 export const DEFAULTS = {
   // Bogen
@@ -21,8 +21,8 @@ export const DEFAULTS = {
 };
 
 export const BUILTIN = {
-  herma4333: {
-    id: 'herma4333',
+  bogen189: {
+    id: 'bogen189',
     name: '189 × 25,4 × 10 mm',
     pageW: 210, pageH: 297,
     secW: 192.8, secH: 270, secRows: 1, secGapY: 0,

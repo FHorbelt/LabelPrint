@@ -1,5 +1,5 @@
 // Geometrie des Etikettenbogens. Rein rechnend, kein DOM — deshalb in Node
-// testbar. Die Zahlen dieser Datei sind gegen die HERMA-Stanzvorlage vermessen;
+// testbar. Die Zahlen dieser Datei sind gegen die Stanzvorlage vermessen;
 // Aenderungen hier muessen test/geometry.test.mjs bestehen.
 
 const n = (v) => {
@@ -150,8 +150,8 @@ export function headingFits(L, s) {
 // Der QR-Inhalt (`full`) und die Aufschrift sind bewusst entkoppelt: der Code
 // traegt immer die vollstaendige Nummer mit Praefix, waehrend auf dem Etikett
 // das Praefix ausgeblendet und stattdessen ein freier Zusatztext stehen kann.
-// Beispiel: Praefix "ASN", Zusatztext "Florian", Praefix ausgeblendet
-//   -> full "ASN000001", Aufschrift "Florian" / "000001".
+// Beispiel: Praefix "ASN", Zusatztext "Archiv", Praefix ausgeblendet
+//   -> full "ASN000001", Aufschrift "Archiv" / "000001".
 export function buildParts(s, i) {
   const prefix = String(s.prefix ?? '');
   const suffix = String(s.suffix ?? '');

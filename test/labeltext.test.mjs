@@ -8,12 +8,12 @@ const mit = (o) => ({ ...DEFAULTS, ...o });
 test('Beispiel: Praefix nur im Code, Name auf dem Etikett', () => {
   const p = buildParts(mit({
     prefix: 'ASN', suffix: '', startNum: 1, padDigits: 6,
-    showPrefixOnLabel: false, labelText: 'Florian'
+    showPrefixOnLabel: false, labelText: 'Archiv'
   }), 0);
   assert.equal(p.full, 'ASN000001', 'QR-Inhalt behaelt das Praefix');
-  assert.equal(p.labelTop, 'Florian');
+  assert.equal(p.labelTop, 'Archiv');
   assert.equal(p.numberPart, '000001');
-  assert.equal(p.labelLine, 'Florian 000001');
+  assert.equal(p.labelLine, 'Archiv 000001');
 });
 
 test('Vorgabe unveraendert: Praefix an, kein Zusatztext', () => {
@@ -34,20 +34,20 @@ test('Praefix aus und kein Zusatztext: nur die Nummer', () => {
 
 test('beides gesetzt: Zusatztext vor Praefix', () => {
   const p = buildParts(mit({
-    prefix: 'ASN', showPrefixOnLabel: true, labelText: 'Florian', startNum: 1, padDigits: 6
+    prefix: 'ASN', showPrefixOnLabel: true, labelText: 'Archiv', startNum: 1, padDigits: 6
   }), 0);
-  assert.equal(p.labelTop, 'Florian ASN');
-  assert.equal(p.labelLine, 'Florian ASN000001');
+  assert.equal(p.labelTop, 'Archiv ASN');
+  assert.equal(p.labelLine, 'Archiv ASN000001');
 });
 
 test('Suffix bleibt an der Nummer, auch im QR-Inhalt', () => {
   const p = buildParts(mit({
-    prefix: 'ASN', suffix: '-X', showPrefixOnLabel: false, labelText: 'Florian',
+    prefix: 'ASN', suffix: '-X', showPrefixOnLabel: false, labelText: 'Archiv',
     startNum: 1, padDigits: 6
   }), 0);
   assert.equal(p.numberPart, '000001-X');
   assert.equal(p.full, 'ASN000001-X');
-  assert.equal(p.labelLine, 'Florian 000001-X');
+  assert.equal(p.labelLine, 'Archiv 000001-X');
 });
 
 test('alte gespeicherte Einstellungen ohne die neuen Felder zeigen das Praefix', () => {
@@ -58,17 +58,17 @@ test('alte gespeicherte Einstellungen ohne die neuen Felder zeigen das Praefix',
 });
 
 test('Zaehlrichtung bleibt: Index verschiebt die Nummer', () => {
-  const s = mit({ prefix: 'ASN', showPrefixOnLabel: false, labelText: 'Florian',
+  const s = mit({ prefix: 'ASN', showPrefixOnLabel: false, labelText: 'Archiv',
                   startNum: 190, padDigits: 6 });
-  assert.equal(buildParts(s, 0).labelLine, 'Florian 000190');
-  assert.equal(buildParts(s, 5).labelLine, 'Florian 000195');
+  assert.equal(buildParts(s, 0).labelLine, 'Archiv 000190');
+  assert.equal(buildParts(s, 5).labelLine, 'Archiv 000195');
   assert.equal(buildParts(s, 5).full, 'ASN000195');
 });
 
 test('Leerraum im Zusatztext erzeugt keine doppelten Leerzeichen', () => {
   const p = buildParts(mit({
-    prefix: '  ', showPrefixOnLabel: true, labelText: '  Florian  ',
+    prefix: '  ', showPrefixOnLabel: true, labelText: '  Archiv  ',
     startNum: 1, padDigits: 6
   }), 0);
-  assert.equal(p.labelTop, 'Florian');
+  assert.equal(p.labelTop, 'Archiv');
 });
