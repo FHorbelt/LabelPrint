@@ -23,7 +23,7 @@ einen versionierten Cache, die QR-Bibliothek liegt lokal unter `app/vendor/`.
 
 ## Tests
 
-    node --test test/*.test.mjs   # Geometrie und Datenhaltung, 20 Tests
+    node --test test/*.test.mjs   # Geometrie, Datenhaltung, Service Worker, 20 Tests
     node test/print-check.mjs     # Druckabnahme, braucht Google Chrome
 
 Das Verzeichnis darf nicht ohne Muster übergeben werden — `node --test test/`
@@ -74,13 +74,22 @@ Stanzkante ablesbar.
 Sitzt etwas zu weit unten oder rechts, den gemessenen Betrag mit **umgekehrtem
 Vorzeichen** eintragen. Die Werte bleiben gespeichert.
 
-## Nach Änderungen an der App
+## Offline-Verhalten
 
-**Die Cache-Version in `app/sw.js` erhöhen.** Der Service Worker bedient
-cache-first. Bleibt die Version stehen, liefert er weiter die alte Fassung aus
-— und weil der Browser nur ein geändertes `sw.js` als neue Version erkennt,
-erscheint dann auch die Leiste „Neue Version verfügbar" nicht. Wer die Nummer
-vergisst, sieht seine eigene Änderung nicht.
+Der Service Worker arbeitet **netz-zuerst**: Solange der Server erreichbar ist,
+kommt immer der aktuelle Stand, und jede brauchbare Antwort wandert nebenbei in
+den Cache. Fällt das Netz aus, bedient der Cache — die App bleibt vollständig
+benutzbar. Ein Seitenaufruf ohne passenden Eintrag bekommt die App-Hülle statt
+einer Fehlerseite.
+
+Damit sind Änderungen sofort nach einem Neuladen sichtbar; die Cache-Version in
+`app/sw.js` dient nur noch dem Aufräumen alter Bestände.
+
+Vorher galt cache-first. Das lud schneller, hatte aber eine Falle: Wer die
+Version nicht mitzog, bekam dauerhaft die alte Fassung ausgeliefert, ohne
+jeden Hinweis. `test/sw.test.mjs` bildet `self` und `caches` in Node nach und
+prüft die Strategie — dass online das Netz gewinnt, offline der Cache, und
+Fehlerantworten den Vorrat nicht überschreiben.
 
 ## Bekannte Einschränkungen
 
