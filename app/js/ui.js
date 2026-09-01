@@ -11,7 +11,7 @@ const CHECKBOXES = new Set([
   'autoCenter', 'fitPrintable', 'showGuides', 'showText', 'stackPrefix', 'showBorder',
   'showPrefixOnLabel'
 ]);
-const TEXTS = new Set(['prefix', 'suffix', 'qrTemplate', 'labelText']);
+const TEXTS = new Set(['prefix', 'suffix', 'qrTemplate', 'labelText', 'heading']);
 
 export function readForm() {
   const s = { ...DEFAULTS };
@@ -60,6 +60,7 @@ export function validate(s) {
   zahl('fontSize', 'Schriftgröße Nummer', 0.1);
   zahl('prefixFontSize', 'Schriftgröße Präfix', 0.1);
   zahl('safeMargin', 'Nicht bedruckbarer Rand');
+  if (String(s.heading ?? '').trim() !== '') zahl('headingSize', 'Schriftgröße Überschrift', 0.1);
   zahl('count', 'Anzahl', 1);
   zahl('startNum', 'Startnummer');
   zahl('padDigits', 'Stellen', 1);

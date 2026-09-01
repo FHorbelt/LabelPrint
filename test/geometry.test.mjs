@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeLayout, pageRule } from '../app/js/sheet.js';
+import { computeLayout, pageRule, headingFits } from '../app/js/sheet.js';
 import { DEFAULTS, BUILTIN } from '../app/js/presets.js';
 
 const nah = (ist, soll, tol = 0.01) =>
@@ -96,4 +96,28 @@ test('Druckregeln in app.css: das Blatt allein, ohne Bedienelemente', () => {
   assert.match(block, /\.label\.frame\{outline:0\.3mm solid #000; outline-offset:-0\.15mm;\}/);
   assert.match(block, /\.pages-wrap\{display:block; gap:0; transform:none !important;\}/,
     'Der Zoom der Vorschau darf nicht mitgedruckt werden');
+});
+
+test('Ueberschrift passt in den freien Streifen der HERMA-Vorlage', () => {
+  const s = mit('herma4333');
+  const L = computeLayout(s);
+  nah(L.inkTop, 13.5);                       // 13,5 mm frei ueber der ersten Reihe
+  assert.equal(headingFits(L, { ...s, heading: 'Ordner 3', headingSize: 4 }), true);
+  assert.equal(headingFits(L, { ...s, heading: 'Ordner 3', headingSize: 13.5 }), true);
+  assert.equal(headingFits(L, { ...s, heading: 'Ordner 3', headingSize: 14 }), false);
+});
+
+test('Beim alten Bogen ist oben zu wenig Platz fuer 4 mm', () => {
+  const s = mit('bogen4');
+  const L = computeLayout(s);
+  nah(L.inkTop, 2.35);
+  assert.equal(headingFits(L, { ...s, heading: 'Ordner 3', headingSize: 4 }), false);
+  assert.equal(headingFits(L, { ...s, heading: 'Ordner 3', headingSize: 2 }), true);
+});
+
+test('Ohne Ueberschrift gibt es nichts zu beanstanden', () => {
+  const L = computeLayout(mit('bogen4'));
+  assert.equal(headingFits(L, { heading: '', headingSize: 99 }), true);
+  assert.equal(headingFits(L, { heading: '   ', headingSize: 99 }), true);
+  assert.equal(headingFits(L, { headingSize: 99 }), true);
 });

@@ -16,7 +16,8 @@ export const DEFAULTS = {
   qrTemplate: '{nr}', count: 189,
   // Darstellung
   showText: true, stackPrefix: true, showBorder: false,
-  showPrefixOnLabel: true, labelText: ''
+  showPrefixOnLabel: true, labelText: '',
+  heading: '', headingSize: 4
 };
 
 export const BUILTIN = {

@@ -78,6 +78,17 @@ export function pageRule(L) {
   return `@page{size:${L.pageW}mm ${L.pageH}mm; margin:0;}`;
 }
 
+// Die Ueberschrift steht im freien Streifen zwischen Blattoberkante und der
+// ersten Etikettenreihe. Dessen Hoehe ist genau `inkTop`. Passt die Schrift
+// nicht hinein, wird gewarnt statt stillschweigend abgeschnitten.
+export function headingFits(L, s) {
+  const text = String(s.heading ?? '').trim();
+  if (text === '') return true;
+  const groesse = parseFloat(s.headingSize);
+  if (!Number.isFinite(groesse)) return true;   // ungueltige Zahl faengt validate() ab
+  return groesse <= L.inkTop;
+}
+
 // Seriennummer eines Etiketts. i ist der Index ab 0.
 //
 // Der QR-Inhalt (`full`) und die Aufschrift sind bewusst entkoppelt: der Code

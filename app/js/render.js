@@ -120,6 +120,18 @@ export function renderSheets(container, L, s) {
       page.appendChild(safe);
     }
 
+    // Ueberschrift in den freien Streifen ueber der ersten Etikettenreihe,
+    // waagerecht und senkrecht darin zentriert.
+    const ueberschrift = String(s.heading ?? '').trim();
+    if (ueberschrift !== '') {
+      const h = document.createElement('div');
+      h.className = 'sheet-heading';
+      h.style.height = `${L.inkTop}mm`;
+      h.style.fontSize = `${s.headingSize}mm`;
+      h.textContent = ueberschrift;
+      page.appendChild(h);
+    }
+
     for (let sec = 0; sec < L.secRows; sec++) {
       const secTop = L.marginTop + sec * (L.secH + L.secGapY);
 

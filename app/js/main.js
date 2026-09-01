@@ -1,4 +1,4 @@
-import { computeLayout, pageRule } from './sheet.js';
+import { computeLayout, pageRule, headingFits } from './sheet.js';
 import { DEFAULTS, BUILTIN, applyTemplate } from './presets.js';
 import { createStore } from './store.js';
 import { renderSheets } from './render.js';
@@ -80,6 +80,11 @@ function zeichne() {
   const gesamtHoehe = L.secRows * L.secH + (L.secRows - 1) * L.secGapY;
   const passtNicht = L.marginTop < 0 || L.marginLeft < 0 || gesamtHoehe > L.pageH + 0.5;
   if (passtNicht) warnungen.push('Die Abschnitte passen nicht auf die Seitengröße.');
+  if (!headingFits(L, s)) {
+    warnungen.push(`Die Überschrift ist mit ${s.headingSize} mm höher als der freie`
+      + ` Streifen über den Etiketten (${L.inkTop.toFixed(2)} mm) — sie würde in die`
+      + ` erste Etikettenreihe ragen.`);
+  }
 
   if (laufendesZeichnen) laufendesZeichnen.cancel();
   laufendesZeichnen = renderSheets($('pagesWrap'), L, s);
