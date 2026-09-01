@@ -23,11 +23,18 @@ einen versionierten Cache, die QR-Bibliothek liegt lokal unter `app/vendor/`.
 
 ## Tests
 
-    node --test test/*.test.mjs   # Geometrie, Datenhaltung, Service Worker, 20 Tests
+    node --test test/*.test.mjs   # Geometrie, Datenhaltung, Service Worker, 53 Tests
     node test/print-check.mjs     # Druckabnahme, braucht Google Chrome
 
 Das Verzeichnis darf nicht ohne Muster übergeben werden — `node --test test/`
 scheitert ab Node 24, weil der Pfad als Modul aufgelöst wird.
+
+## Maße
+
+Die Maße in `app/js/sheet.js` und `app/js/presets.js` sind an einer
+Stanzvorlage für 189 Etiketten à 25,4 × 10 mm vermessen. Änderungen daran
+müssen `test/geometry.test.mjs` bestehen — dort sind die folgenden Werte
+festgeschrieben:
 
 | Größe | Sollwert |
 |---|---|
