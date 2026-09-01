@@ -188,6 +188,33 @@ input[aria-invalid="true"]{border-color:var(--danger);}
     max-height:52vh;}
 }
 
+/* Handybreite: die Kopfzeile passte bisher nicht — Marke und Vorlagenknopf
+   brachen zweizeilig um und schoben den Drucken-Knopf aus dem Bild. Jetzt
+   bleibt Zeile 1 den Bedienelementen vorbehalten, die Statuszeile rutscht
+   darunter. */
+@media (max-width: 600px){
+  .topbar{flex-wrap:wrap; gap:8px; padding:8px 10px;}
+  .brand{font-size:13px; white-space:nowrap;}
+  /* Basis 0 statt auto: sonst bleibt die volle Textbreite die Ausgangsgroesse
+     und der Knopf schrumpft nicht, egal wie eng es wird. */
+  .brand{flex:0 0 auto;}
+  .preset-wrap{flex:1 1 0; min-width:0;}
+  #themeBtn, #printBtn{flex:0 0 auto;}
+  .preset-btn{
+    display:block; width:100%;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    text-align:left; font-size:12px; padding:5px 8px;
+  }
+  /* Der Zwischenraum wuerde die Zeile sprengen; der Drucken-Knopf haelt
+     sich stattdessen selbst nach rechts. */
+  .topbar .spacer{display:none;}
+  #printBtn{margin-left:auto; padding:6px 12px;}
+  /* Volle Breite in einer zweiten Zeile, damit sie nichts verdraengt. */
+  .status{order:10; flex:1 0 100%; font-size:11.5px;}
+  /* Das Vorlagenmenue war mit 280 px breiter als der Bildschirm. */
+  .menu{position:fixed; left:10px; right:10px; min-width:0; width:auto;}
+}
+
 @media print{
   .topbar, .sidebar, .tools, .history, .update-bar, .page-caption{display:none !important;}
   body{display:block; background:#fff; min-height:0;}

@@ -5,6 +5,12 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+// Die aktuelle Cache-Version aus der Datei lesen statt sie hier festzuschreiben —
+// sonst bricht der Test bei jeder Versionserhoehung, ohne dass etwas kaputt ist.
+const AKTUELL = readFileSync(new URL('../app/sw.js', import.meta.url), 'utf8')
+  .match(/const CACHE = '([^']+)'/)[1];
 
 const listener = {};
 const cacheInhalt = new Map();
@@ -99,9 +105,9 @@ test('nur GET wird behandelt', () => {
 });
 
 test('activate raeumt Caches anderer Versionen ab', async () => {
-  letzteCacheNamen = ['asn-v1', 'asn-v5', 'asn-v7'];
+  letzteCacheNamen = ['asn-v1', 'asn-v5', AKTUELL];
   let gewartet;
   listener.activate({ waitUntil: (p) => { gewartet = p; } });
   await gewartet;
-  assert.deepEqual(letzteCacheNamen, ['asn-v7'], 'nur die aktuelle Version bleibt');
+  assert.deepEqual(letzteCacheNamen, [AKTUELL], 'nur die aktuelle Version bleibt');
 });
