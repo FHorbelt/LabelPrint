@@ -78,6 +78,29 @@ export function pageRule(L) {
   return `@page{size:${L.pageW}mm ${L.pageH}mm; margin:0;}`;
 }
 
+// Kontrastverhaeltnis einer Druckfarbe gegen weisses Papier, nach WCAG.
+// Schwarz ergibt 21:1, Weiss 1:1. Unbrauchbare Eingaben ergeben 21, damit die
+// Oberflaeche nicht grundlos warnt.
+export function kontrastZuWeiss(hex) {
+  const h = String(hex ?? '').trim().replace(/^#/, '');
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return 21;
+  const kanal = (v) => {
+    const x = v / 255;
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  };
+  const r = kanal(parseInt(h.slice(0, 2), 16));
+  const g = kanal(parseInt(h.slice(2, 4), 16));
+  const b = kanal(parseInt(h.slice(4, 6), 16));
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return 1.05 / (L + 0.05);
+}
+
+// Ab hier wird ein QR-Code fuer Scanner unsicher. Der Wert entspricht der
+// ueblichen Schwelle fuer ausreichenden Kontrast.
+export function qrLesbar(hex) {
+  return kontrastZuWeiss(hex) >= 4.5;
+}
+
 // Zoomstufe in Prozent, bei der ein Bogen in die verfuegbare Breite passt.
 // Passt er ohnehin, bleibt es bei 100. Abgerundet auf ganze Prozent, damit
 // nichts an der Kante klemmt; die Untergrenze entspricht der des Zoomreglers.

@@ -17,7 +17,8 @@ export const DEFAULTS = {
   // Darstellung
   showText: true, stackPrefix: true, showBorder: false,
   showPrefixOnLabel: true, labelText: '',
-  heading: '', headingSize: 4
+  heading: '', headingSize: 4,
+  inkColor: '#000000'
 };
 
 export const BUILTIN = {

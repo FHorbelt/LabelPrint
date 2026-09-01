@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeLayout, pageRule, headingFits, labelTop, labelLeft, fitZoom } from '../app/js/sheet.js';
+import { computeLayout, pageRule, headingFits, labelTop, labelLeft, fitZoom,
+         kontrastZuWeiss, qrLesbar } from '../app/js/sheet.js';
 import { DEFAULTS, BUILTIN } from '../app/js/presets.js';
 
 const nah = (ist, soll, tol = 0.01) =>
@@ -224,4 +225,35 @@ test('Unsinnige Eingaben ergeben 100 statt NaN', () => {
   assert.equal(fitZoom(0, 210), 100);
   assert.equal(fitZoom(390, 0), 100);
   assert.equal(fitZoom(NaN, 210), 100);
+});
+
+test('Kontrast gegen Weiss: die bekannten Eckwerte', () => {
+  nah(kontrastZuWeiss('#000000'), 21.0, 0.01);
+  nah(kontrastZuWeiss('#ffffff'), 1.0, 0.01);
+});
+
+test('Kraeftige Farben bleiben lesbar, helle nicht', () => {
+  nah(kontrastZuWeiss('#c00000'), 6.48, 0.02);   // kraeftiges Rot
+  nah(kontrastZuWeiss('#0000cc'), 11.22, 0.02);  // kraeftiges Blau
+  nah(kontrastZuWeiss('#ffff00'), 1.07, 0.02);   // Gelb
+  nah(kontrastZuWeiss('#bbbbbb'), 1.92, 0.02);   // helles Grau
+
+  assert.equal(qrLesbar('#000000'), true);
+  assert.equal(qrLesbar('#c00000'), true, 'Rot muss fuer den Abgleich taugen');
+  assert.equal(qrLesbar('#0000cc'), true);
+  assert.equal(qrLesbar('#ffff00'), false, 'Gelb kann kein Scanner lesen');
+  assert.equal(qrLesbar('#bbbbbb'), false);
+  assert.equal(qrLesbar('#888888'), false, 'mittleres Grau liegt mit 3,5:1 darunter');
+});
+
+test('Grossschreibung und fehlendes Doppelkreuz stoeren nicht', () => {
+  nah(kontrastZuWeiss('#C00000'), kontrastZuWeiss('#c00000'), 0.001);
+  nah(kontrastZuWeiss('c00000'), kontrastZuWeiss('#c00000'), 0.001);
+});
+
+test('Unbrauchbare Eingaben loesen keine falsche Warnung aus', () => {
+  // Lieber schweigen als grundlos warnen: unlesbare Eingabe gilt als in Ordnung.
+  assert.equal(qrLesbar(''), true);
+  assert.equal(qrLesbar('rot'), true);
+  assert.equal(qrLesbar(undefined), true);
 });

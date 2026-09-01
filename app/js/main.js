@@ -1,4 +1,4 @@
-import { computeLayout, pageRule, headingFits, fitZoom,
+import { computeLayout, pageRule, headingFits, fitZoom, kontrastZuWeiss, qrLesbar,
          correctedInkBottom, correctedInkLeft, correctedInkRight } from './sheet.js';
 import { DEFAULTS, BUILTIN, applyTemplate } from './presets.js';
 import { createStore } from './store.js';
@@ -85,6 +85,11 @@ function zeichne() {
   const gesamtHoehe = L.secRows * L.secH + (L.secRows - 1) * L.secGapY;
   const passtNicht = L.marginTop < 0 || L.marginLeft < 0 || gesamtHoehe > L.pageH + 0.5;
   if (passtNicht) warnungen.push('Die Abschnitte passen nicht auf die Seitengröße.');
+  if (!qrLesbar(s.inkColor)) {
+    warnungen.push(`Die Druckfarbe hat gegen weißes Papier nur`
+      + ` ${kontrastZuWeiss(s.inkColor).toFixed(1)}:1 Kontrast — zu wenig, damit ein`
+      + ` Scanner die QR-Codes liest. Für den Druckerabgleich reicht es, zum Einlesen nicht.`);
+  }
   if (!headingFits(L, s)) {
     warnungen.push(`Die Überschrift ist mit ${s.headingSize} mm höher als der freie`
       + ` Streifen über den Etiketten (${L.inkTop.toFixed(2)} mm) — sie würde in die`

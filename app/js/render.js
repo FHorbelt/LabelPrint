@@ -9,8 +9,10 @@ const CACHE_MAX = 2000;
 
 export function clearQrCache() { cache.clear(); }
 
-export function qrSVG(data, sizeMM) {
-  const key = `${data}|${sizeMM}`;
+export function qrSVG(data, sizeMM, farbe = '#000000') {
+  // Die Farbe gehoert in den Schluessel: sonst bliebe nach einem Farbwechsel
+  // die alte Grafik stehen und Vorschau und Druck wichen voneinander ab.
+  const key = `${data}|${sizeMM}|${farbe}`;
   const hit = cache.get(key);
   if (hit) return hit;
 
@@ -33,7 +35,8 @@ export function qrSVG(data, sizeMM) {
     }
   }
   const svg = `<svg width="${sizeMM}mm" height="${sizeMM}mm" viewBox="0 0 ${sizeMM} ${sizeMM}"`
-            + ` xmlns="http://www.w3.org/2000/svg" style="shape-rendering:crispEdges;display:block;">`
+            + ` xmlns="http://www.w3.org/2000/svg" fill="${farbe}"`
+            + ` style="shape-rendering:crispEdges;display:block;">`
             + `${rects}</svg>`;
 
   if (cache.size >= CACHE_MAX) cache.clear();
@@ -44,6 +47,8 @@ export function qrSVG(data, sizeMM) {
 function labelElement(L, s, parts, left, top) {
   const lab = document.createElement('div');
   lab.className = s.showBorder ? 'label frame' : 'label';
+  lab.style.color = s.inkColor || '#000000';
+  if (s.showBorder) lab.style.outlineColor = s.inkColor || '#000000';
   lab.style.borderRadius = `${s.labRadius}mm`;
   lab.style.left = `${left}mm`;
   lab.style.top = `${top}mm`;
@@ -128,6 +133,7 @@ export function renderSheets(container, L, s) {
       h.className = 'sheet-heading';
       h.style.height = `${L.inkTop}mm`;
       h.style.fontSize = `${s.headingSize}mm`;
+      h.style.color = s.inkColor || '#000000';
       h.textContent = ueberschrift;
       page.appendChild(h);
     }
@@ -176,7 +182,7 @@ export function renderSheets(container, L, s) {
       do {
         const a = auftraege[i];
         try {
-          a.qrCell.innerHTML = qrSVG(a.daten, a.groesse);
+          a.qrCell.innerHTML = qrSVG(a.daten, a.groesse, s.inkColor || '#000000');
         } catch {
           // Nie stillschweigend weitermachen: das Etikett wird sichtbar
           // markiert, und main.js sperrt daraufhin den Druck.

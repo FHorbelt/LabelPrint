@@ -74,6 +74,14 @@ Stanzkante ablesbar.
 Sitzt etwas zu weit unten oder rechts, den gemessenen Betrag mit **umgekehrtem
 Vorzeichen** eintragen. Die Werte bleiben gespeichert.
 
+**Denselben Bogen mehrfach nutzen.** Über „Druckfarbe" in der Gruppe
+*Darstellung* lässt sich jeder Durchgang farblich unterscheiden — schwarz
+zuerst, danach kräftiges Rot und Blau. So kostet der Abgleich einen einzigen
+Bogen statt drei. Die Etikettenflächen selbst bleiben ungedruckt, weil Browser
+Hintergrundfarben nicht mitdrucken; es landet nur Strichzeichnung auf dem
+Papier. Bei zu hellen Farben warnt die App, weil ein Scanner die QR-Codes dann
+nicht mehr liest — fürs Ausmessen stört das nicht.
+
 ## Offline-Verhalten
 
 Der Service Worker arbeitet **netz-zuerst**: Solange der Server erreichbar ist,

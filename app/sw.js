@@ -9,7 +9,7 @@
 // ausgeliefert, ohne dass irgendetwas darauf hinwies. Genau das ist passiert.
 // Die Version dient jetzt nur noch dem Aufraeumen alter Bestaende.
 
-const CACHE = 'asn-v10';
+const CACHE = 'asn-v11';
 
 const SCHALE = [
   './',

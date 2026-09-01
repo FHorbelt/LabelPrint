@@ -11,7 +11,7 @@ const CHECKBOXES = new Set([
   'autoCenter', 'fitPrintable', 'showGuides', 'showText', 'stackPrefix', 'showBorder',
   'showPrefixOnLabel'
 ]);
-const TEXTS = new Set(['prefix', 'suffix', 'qrTemplate', 'labelText', 'heading']);
+const TEXTS = new Set(['prefix', 'suffix', 'qrTemplate', 'labelText', 'heading', 'inkColor']);
 
 export function readForm() {
   const s = { ...DEFAULTS };
