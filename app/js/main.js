@@ -1,4 +1,5 @@
-import { computeLayout, pageRule, headingFits, correctedInkBottom } from './sheet.js';
+import { computeLayout, pageRule, headingFits,
+         correctedInkBottom, correctedInkLeft, correctedInkRight } from './sheet.js';
 import { DEFAULTS, BUILTIN, applyTemplate } from './presets.js';
 import { createStore } from './store.js';
 import { renderSheets } from './render.js';
@@ -68,11 +69,13 @@ function zeichne() {
 
   $('pageCount').textContent = `Seite 1 / ${seiten}`;
 
-  // Die Unterkante mit Hoehenkorrektur rechnen, sonst luegt die Randwarnung.
+  // Mit den Korrekturen rechnen, sonst luegt die Randwarnung.
+  const linksKorr = correctedInkLeft(L, s);
+  const rechtsKorr = correctedInkRight(L, s);
   const untenKorr = correctedInkBottom(L, s);
-  const minRand = Math.min(L.inkLeft, L.inkRight, L.inkTop, untenKorr);
+  const minRand = Math.min(linksKorr, rechtsKorr, L.inkTop, untenKorr);
   $('marginReadout').textContent =
-    `Rand außen ${L.inkLeft.toFixed(2)} / ${L.inkTop.toFixed(2)} mm`;
+    `Rand außen ${linksKorr.toFixed(2)} / ${L.inkTop.toFixed(2)} mm`;
 
   const warnungen = [];
   if (L.safeMargin > 0 && minRand < L.safeMargin) {

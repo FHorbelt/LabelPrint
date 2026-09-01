@@ -2,7 +2,7 @@
 // QR-Codes in Zeitscheiben nach — sonst blockieren 189 QR-Berechnungen
 // die Eingabe.
 
-import { buildParts, labelTop } from './sheet.js';
+import { buildParts, labelTop, labelLeft } from './sheet.js';
 
 const cache = new Map();          // "daten|groesse" -> SVG-Zeichenkette
 const CACHE_MAX = 2000;
@@ -149,7 +149,7 @@ export function renderSheets(container, L, s) {
         for (let c = 0; c < L.cols; c++) {
           if (idx >= count) continue;
           const parts = buildParts(s, idx);
-          const left = L.marginLeft + L.freeW / 2 + c * (L.labW + L.gapX);
+          const left = labelLeft(L, s, c);
           const top = labelTop(L, s, sec, r);
           const { lab, qrCell, qrSize } = labelElement(L, s, parts, left, top);
           page.appendChild(lab);

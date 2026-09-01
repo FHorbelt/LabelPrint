@@ -54,6 +54,26 @@ Der Drucken-Knopf löst den Druckdialog direkt aus dieser Seite aus. Was
 gedruckt wird, steuert allein der `@media print`-Block in `app/css/app.css`;
 `test/geometry.test.mjs` sichert dessen entscheidende Regeln ab.
 
+## Druckerabgleich
+
+Drucker bilden selten exakt 1:1 ab. Drei Werte in der Gruppe *Bogen* gleichen
+das aus, jeweils −5 bis +5 mm in 0,1er-Schritten:
+
+| Wert | Wirkung |
+|---|---|
+| Höhenkorrektur | oberste Reihe bleibt fest, alles darunter wird gestreckt oder gestaucht |
+| Breitenkorrektur | linke Spalte bleibt fest, alles rechts davon wird gestreckt oder gestaucht |
+| Versatz waagerecht | verschiebt alle Spalten gemeinsam |
+
+Vorgehen mit einem Testbogen: erst den Versatz so einstellen, dass die **linke**
+Spalte sitzt, dann die Breitenkorrektur, bis die **rechte** stimmt; danach die
+Höhenkorrektur nach der untersten Reihe. Beim Ausmessen hilft, „Rahmen
+mitdrucken" kurz einzuschalten — dann ist die gedruckte Kante gegen die
+Stanzkante ablesbar.
+
+Sitzt etwas zu weit unten oder rechts, den gemessenen Betrag mit **umgekehrtem
+Vorzeichen** eintragen. Die Werte bleiben gespeichert.
+
 ## Nach Änderungen an der App
 
 **Die Cache-Version in `app/sw.js` erhöhen.** Der Service Worker bedient

@@ -94,10 +94,34 @@ export function labelTop(L, s, sec, r) {
   return ersteOben + k * (sec * (L.secH + L.secGapY) + r * (L.labH + L.gapY));
 }
 
-// Abstand der untersten Etikettenkante zum unteren Blattrand — mit der
-// Hoehenkorrektur gerechnet, damit die Randwarnung nicht luegt.
+// Waagerechte Position der linken Kante einer Etikettenspalte, in Millimetern
+// von der linken Blattkante.
+//
+// Spiegelbildlich zu labelTop, aber mit zwei Stellschrauben: `widthAdjust`
+// streckt oder staucht von der linken Spalte aus (gegen Aufsummierung nach
+// rechts), `offsetX` verschiebt alle Spalten gemeinsam (gegen einen Versatz,
+// der schon die linke Spalte betrifft).
+export function labelLeft(L, s, c) {
+  const ersteLinks = L.marginLeft + L.freeW / 2;
+  const spanne = (L.cols - 1) * (L.labW + L.gapX);
+  const korrektur = parseFloat(s.widthAdjust);
+  const k = (spanne > 0 && Number.isFinite(korrektur)) ? (spanne + korrektur) / spanne : 1;
+  const versatz = parseFloat(s.offsetX);
+  return ersteLinks + (Number.isFinite(versatz) ? versatz : 0) + k * (c * (L.labW + L.gapX));
+}
+
+// Abstaende der aeussersten Etikettenkanten zum Blattrand — mit den
+// Korrekturen gerechnet, damit die Randwarnung nicht luegt.
 export function correctedInkBottom(L, s) {
   return L.pageH - (labelTop(L, s, L.secRows - 1, L.rows - 1) + L.labH);
+}
+
+export function correctedInkLeft(L, s) {
+  return labelLeft(L, s, 0);
+}
+
+export function correctedInkRight(L, s) {
+  return L.pageW - (labelLeft(L, s, L.cols - 1) + L.labW);
 }
 
 // Die Ueberschrift steht im freien Streifen zwischen Blattoberkante und der

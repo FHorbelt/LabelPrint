@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeLayout, pageRule, headingFits, labelTop } from '../app/js/sheet.js';
+import { computeLayout, pageRule, headingFits, labelTop, labelLeft } from '../app/js/sheet.js';
 import { DEFAULTS, BUILTIN } from '../app/js/presets.js';
 
 const nah = (ist, soll, tol = 0.01) =>
@@ -162,4 +162,43 @@ test('Mehrere Abschnitte: die Korrektur wirkt ueber den ganzen Block', () => {
   const s1 = { ...s0, heightAdjust: -1 };
   nah(labelTop(L, s1, 0, 0), 2.35, 0.001);
   nah(labelTop(L, s1, 3, 6), 283.65, 0.001);
+});
+
+test('Breitenkorrektur 0 und Versatz 0 ergeben die bisherigen Positionen', () => {
+  const s = mit('herma4333');
+  const L = computeLayout(s);
+  nah(labelLeft(L, s, 0), 8.6);
+  nah(labelLeft(L, s, 6), 176.0);
+  nah(labelLeft(L, s, 6) + L.labW, 201.4);
+  const ohne = { ...s }; delete ohne.widthAdjust; delete ohne.offsetX;
+  nah(labelLeft(L, ohne, 6), 176.0);
+});
+
+test('Breitenkorrektur laesst die linke Spalte fest', () => {
+  const s = { ...mit('herma4333'), widthAdjust: -0.6 };
+  const L = computeLayout(s);
+  nah(labelLeft(L, s, 0), 8.6, 0.001);
+  nah(labelLeft(L, s, 6), 175.4, 0.001);
+  nah(labelLeft(L, s, 3), 8.6 + 3 * (27.9 - 0.1), 0.001);   // 0,1 mm je Spaltenabstand
+});
+
+test('Versatz waagerecht verschiebt alle Spalten gleich', () => {
+  const s = { ...mit('herma4333'), offsetX: 0.3 };
+  const L = computeLayout(s);
+  nah(labelLeft(L, s, 0), 8.9, 0.001);
+  nah(labelLeft(L, s, 6), 176.3, 0.001);
+});
+
+test('Versatz und Breitenkorrektur wirken zusammen', () => {
+  const s = { ...mit('herma4333'), offsetX: 0.3, widthAdjust: -0.6 };
+  const L = computeLayout(s);
+  nah(labelLeft(L, s, 0), 8.9, 0.001);
+  nah(labelLeft(L, s, 6), 175.7, 0.001);
+});
+
+test('Alter Bogen: acht Spalten ohne Korrektur unveraendert', () => {
+  const s = mit('bogen4');
+  const L = computeLayout(s);
+  nah(labelLeft(L, s, 0), 2.35);
+  nah(labelLeft(L, s, 7), 182.25);
 });

@@ -60,10 +60,11 @@ export function validate(s) {
   zahl('fontSize', 'Schriftgröße Nummer', 0.1);
   zahl('prefixFontSize', 'Schriftgröße Präfix', 0.1);
   zahl('safeMargin', 'Nicht bedruckbarer Rand');
-  if (!Number.isFinite(s.heightAdjust)) {
-    p.push({ id: 'heightAdjust', text: 'Höhenkorrektur: keine gültige Zahl' });
-  } else if (s.heightAdjust < -5 || s.heightAdjust > 5) {
-    p.push({ id: 'heightAdjust', text: 'Höhenkorrektur: nur −5 bis +5 mm' });
+  for (const [id, name] of [['heightAdjust', 'Höhenkorrektur'],
+                            ['widthAdjust', 'Breitenkorrektur'],
+                            ['offsetX', 'Versatz waagerecht']]) {
+    if (!Number.isFinite(s[id])) p.push({ id, text: `${name}: keine gültige Zahl` });
+    else if (s[id] < -5 || s[id] > 5) p.push({ id, text: `${name}: nur −5 bis +5 mm` });
   }
   if (String(s.heading ?? '').trim() !== '') zahl('headingSize', 'Schriftgröße Überschrift', 0.1);
   zahl('count', 'Anzahl', 1);
