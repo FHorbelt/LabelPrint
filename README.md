@@ -29,16 +29,6 @@ einen versionierten Cache, die QR-Bibliothek liegt lokal unter `app/vendor/`.
 Das Verzeichnis darf nicht ohne Muster übergeben werden — `node --test test/`
 scheitert ab Node 24, weil der Pfad als Modul aufgelöst wird.
 
-## Wichtig
-
-Die Maße in `app/js/sheet.js` und `app/js/presets.js` sind gegen HERMAs
-Stanzvorlage für 4243/4244/4333 vermessen. Die Vorlage selbst liegt **nicht**
-im Repository — sie ist HERMAs Material und wird zum Betrieb nicht gebraucht;
-die daraus gewonnenen Maße stehen unten, im Code und in den Tests. Wer
-nachmessen will, lädt sie bei HERMA herunter.
-
-Änderungen an den Maßen müssen `test/geometry.test.mjs` bestehen. Verbindlich:
-
 | Größe | Sollwert |
 |---|---|
 | Raster | 7 × 27 = 189 |
@@ -110,10 +100,6 @@ von `test/print-check.mjs` abgesichert.
 **Zähler ist gerätegebunden.** Der ASN-Zähler liegt im `localStorage` des
 Browsers. Wer die App von zwei Geräten nutzt, bekommt auseinanderlaufende
 Zähler. Bewusste Entscheidung gegen eine paperless-Anbindung, siehe Spec.
-
-**Nicht bedruckbarer Rand.** Bleibt eine physische Grenze des Druckers. Bei
-der HERMA-Vorlage unkritisch (8,6 bzw. 13,5 mm Rand), bei eigenen Vorlagen
-warnt die App und zeigt den gemessenen Außenrand dauerhaft über der Vorschau.
 
 ## Aufbau
 
