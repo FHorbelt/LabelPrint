@@ -78,6 +78,28 @@ export function pageRule(L) {
   return `@page{size:${L.pageW}mm ${L.pageH}mm; margin:0;}`;
 }
 
+// Senkrechte Position der Oberkante einer Etikettenreihe, in Millimetern von
+// der Blattoberkante.
+//
+// `heightAdjust` gleicht Drucker aus, die minimal zu gross oder zu klein
+// abbilden: die oberste Reihe bleibt fest, alles darunter wird gleichmaessig
+// gestreckt oder gestaucht, sodass sich der Abstand zwischen oberster und
+// unterster Reihe um genau diesen Betrag aendert. Die Etikettenhoehe selbst
+// bleibt unberuehrt — sie entspricht der Stanzung, nur die Positionen driften.
+export function labelTop(L, s, sec, r) {
+  const ersteOben = L.marginTop + L.freeH / 2;
+  const spanne = (L.secRows - 1) * (L.secH + L.secGapY) + (L.rows - 1) * (L.labH + L.gapY);
+  const korrektur = parseFloat(s.heightAdjust);
+  const k = (spanne > 0 && Number.isFinite(korrektur)) ? (spanne + korrektur) / spanne : 1;
+  return ersteOben + k * (sec * (L.secH + L.secGapY) + r * (L.labH + L.gapY));
+}
+
+// Abstand der untersten Etikettenkante zum unteren Blattrand — mit der
+// Hoehenkorrektur gerechnet, damit die Randwarnung nicht luegt.
+export function correctedInkBottom(L, s) {
+  return L.pageH - (labelTop(L, s, L.secRows - 1, L.rows - 1) + L.labH);
+}
+
 // Die Ueberschrift steht im freien Streifen zwischen Blattoberkante und der
 // ersten Etikettenreihe. Dessen Hoehe ist genau `inkTop`. Passt die Schrift
 // nicht hinein, wird gewarnt statt stillschweigend abgeschnitten.

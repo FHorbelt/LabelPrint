@@ -5,7 +5,7 @@ export const DEFAULTS = {
   // Bogen
   pageW: 210, pageH: 297,
   secW: 192.8, secH: 270, secRows: 1, secGapY: 0,
-  autoCenter: true, marginLeft: 1, marginTop: 1.25,
+  autoCenter: true, marginLeft: 1, marginTop: 1.25, heightAdjust: 0,
   safeMargin: 4.2, fitPrintable: false, showGuides: true,
   // Etikett
   labW: 25.4, labH: 10, gapX: 2.5, gapY: 0,

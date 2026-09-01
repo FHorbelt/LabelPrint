@@ -2,7 +2,7 @@
 // weil auch die QR-Bibliothek lokal liegt.
 // Bei jeder Aenderung an den Dateien die Versionsnummer erhoehen.
 
-const CACHE = 'asn-v4';
+const CACHE = 'asn-v5';
 
 const SCHALE = [
   './',

@@ -85,6 +85,11 @@
         <label class="full">Nicht bedruckbarer Rand (mm)
           <input type="number" id="safeMargin" step="0.1" min="0"></label>
         <label class="check"><input type="checkbox" id="fitPrintable"> In bedruckbaren Bereich einpassen</label>
+        <label class="full" style="margin-top:10px">Höhenkorrektur gesamt (mm)
+          <input type="number" id="heightAdjust" step="0.1" min="-5" max="5"></label>
+        <p class="hint" style="margin:4px 0 0; font-size:11px; line-height:1.45;">
+          Gegen Drucker, die minimal zu groß abbilden. Die oberste Reihe bleibt fest.
+          Sitzt die unterste Reihe 0,6 mm zu tief, hier −0,6 eintragen.</p>
       </div>
     </details>
 

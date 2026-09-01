@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeLayout, pageRule, headingFits } from '../app/js/sheet.js';
+import { computeLayout, pageRule, headingFits, labelTop } from '../app/js/sheet.js';
 import { DEFAULTS, BUILTIN } from '../app/js/presets.js';
 
 const nah = (ist, soll, tol = 0.01) =>
@@ -120,4 +120,46 @@ test('Ohne Ueberschrift gibt es nichts zu beanstanden', () => {
   assert.equal(headingFits(L, { heading: '', headingSize: 99 }), true);
   assert.equal(headingFits(L, { heading: '   ', headingSize: 99 }), true);
   assert.equal(headingFits(L, { headingSize: 99 }), true);
+});
+
+test('Hoehenkorrektur 0 ergibt exakt die bisherigen Positionen', () => {
+  const s = mit('herma4333');
+  const L = computeLayout(s);
+  nah(labelTop(L, s, 0, 0), 13.5);
+  nah(labelTop(L, s, 0, 26), 273.5);
+  nah(labelTop(L, s, 0, 26) + L.labH, 283.5);
+  // fehlt das Feld ganz (alte gespeicherte Einstellungen), aendert sich nichts
+  const ohne = { ...s }; delete ohne.heightAdjust;
+  nah(labelTop(L, ohne, 0, 26), 273.5);
+});
+
+test('Minus 0,5 mm zieht die unterste Reihe um genau 0,5 mm hoch', () => {
+  const s = { ...mit('herma4333'), heightAdjust: -0.5 };
+  const L = computeLayout(s);
+  nah(labelTop(L, s, 0, 0), 13.5, 0.001);     // oberste Reihe bleibt fest
+  nah(labelTop(L, s, 0, 26), 273.0, 0.001);
+});
+
+test('Plus 1 mm schiebt die unterste Reihe um genau 1 mm nach unten', () => {
+  const s = { ...mit('herma4333'), heightAdjust: 1 };
+  const L = computeLayout(s);
+  nah(labelTop(L, s, 0, 0), 13.5, 0.001);
+  nah(labelTop(L, s, 0, 26), 274.5, 0.001);
+});
+
+test('Die Korrektur verteilt sich gleichmaessig ueber die Reihen', () => {
+  const s = { ...mit('herma4333'), heightAdjust: -2.6 };   // 0,1 mm je Zeilenabstand
+  const L = computeLayout(s);
+  nah(labelTop(L, s, 0, 13), 13.5 + 13 * (10 - 0.1), 0.001);
+  nah(labelTop(L, s, 0, 26), 273.5 - 2.6, 0.001);
+});
+
+test('Mehrere Abschnitte: die Korrektur wirkt ueber den ganzen Block', () => {
+  const s0 = mit('bogen4');
+  const L = computeLayout(s0);
+  nah(labelTop(L, s0, 0, 0), 2.35);
+  nah(labelTop(L, s0, 3, 6), 284.65);
+  const s1 = { ...s0, heightAdjust: -1 };
+  nah(labelTop(L, s1, 0, 0), 2.35, 0.001);
+  nah(labelTop(L, s1, 3, 6), 283.65, 0.001);
 });
