@@ -23,7 +23,7 @@ export const DEFAULTS = {
 export const BUILTIN = {
   herma4333: {
     id: 'herma4333',
-    name: 'HERMA 4243/4244/4333 — 25,4 × 10 mm, 189 Stück',
+    name: '189 × 25,4 × 10 mm',
     pageW: 210, pageH: 297,
     secW: 192.8, secH: 270, secRows: 1, secGapY: 0,
     labW: 25.4, labH: 10, gapX: 2.5, gapY: 0,
