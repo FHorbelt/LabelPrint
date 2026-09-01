@@ -128,8 +128,10 @@ input[aria-invalid="true"]{border-color:var(--danger);}
   font-size:12px; color:var(--muted);
 }
 .canvas{flex:1; overflow:auto; padding:18px; display:flex; justify-content:center;}
-.pages-wrap{display:flex; flex-direction:column; align-items:flex-start; gap:20px;
-  transform-origin:top center;}
+/* Zoom ueber die CSS-Eigenschaft `zoom`, nicht ueber transform: transform
+   verkleinert nur die Darstellung, der Platzbedarf im Layout bliebe bei
+   210 mm — und damit der Balken zum Seitwaertsscrollen. */
+.pages-wrap{display:flex; flex-direction:column; align-items:flex-start; gap:20px;}
 
 .page-frame{
   background:#fff; position:relative;
@@ -220,7 +222,9 @@ input[aria-invalid="true"]{border-color:var(--danger);}
   body{display:block; background:#fff; min-height:0;}
   .layout, .preview{display:block;}
   .canvas{padding:0; overflow:visible; display:block;}
-  .pages-wrap{display:block; gap:0; transform:none !important;}
+  /* Beide zuruecksetzen: eine verkleinerte Vorschau duerfte niemals
+     verkleinert gedruckt werden — das faellt erst auf dem Papier auf. */
+  .pages-wrap{display:block; gap:0; transform:none !important; zoom:1 !important;}
   .page-frame{box-shadow:none !important; margin:0;}
   .page-frame ~ .page-frame{break-before:page; page-break-before:always;}
   .section-outline{border:none;}

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { computeLayout, pageRule, headingFits, labelTop, labelLeft } from '../app/js/sheet.js';
+import { computeLayout, pageRule, headingFits, labelTop, labelLeft, fitZoom } from '../app/js/sheet.js';
 import { DEFAULTS, BUILTIN } from '../app/js/presets.js';
 
 const nah = (ist, soll, tol = 0.01) =>
@@ -94,8 +94,8 @@ test('Druckregeln in app.css: das Blatt allein, ohne Bedienelemente', () => {
   assert.match(block, /\.safe-area\{display:none;\}/);
   assert.match(block, /\.label\{outline:none;\}/);
   assert.match(block, /\.label\.frame\{outline:0\.3mm solid #000; outline-offset:-0\.15mm;\}/);
-  assert.match(block, /\.pages-wrap\{display:block; gap:0; transform:none !important;\}/,
-    'Der Zoom der Vorschau darf nicht mitgedruckt werden');
+  assert.match(block, /\.pages-wrap\{display:block; gap:0; transform:none !important; zoom:1 !important;\}/,
+    'Der Zoom der Vorschau darf nicht mitgedruckt werden — weder transform noch zoom');
 });
 
 test('Ueberschrift passt in den freien Streifen der HERMA-Vorlage', () => {
@@ -201,4 +201,27 @@ test('Alter Bogen: acht Spalten ohne Korrektur unveraendert', () => {
   const L = computeLayout(s);
   nah(labelLeft(L, s, 0), 2.35);
   nah(labelLeft(L, s, 7), 182.25);
+});
+
+test('Passt der Bogen, bleibt es bei 100 Prozent', () => {
+  assert.equal(fitZoom(1000, 210), 100);
+  assert.equal(fitZoom(210 * 96 / 25.4, 210), 100, 'genau passend zaehlt als passend');
+  assert.equal(fitZoom(793.7, 210), 99, 'ein Hauch zu schmal ergibt 99');
+});
+
+test('Bei Handybreite wird auf ganze Prozent abgerundet', () => {
+  // 210 mm sind 793,7 CSS-Pixel; 390 / 793,7 = 49,1 Prozent
+  assert.equal(fitZoom(390, 210), 49);
+  assert.equal(fitZoom(600, 210), 75);
+});
+
+test('Der Zoom faellt nicht unter die Untergrenze von 25 Prozent', () => {
+  assert.equal(fitZoom(100, 210), 25);
+  assert.equal(fitZoom(1, 210), 25);
+});
+
+test('Unsinnige Eingaben ergeben 100 statt NaN', () => {
+  assert.equal(fitZoom(0, 210), 100);
+  assert.equal(fitZoom(390, 0), 100);
+  assert.equal(fitZoom(NaN, 210), 100);
 });

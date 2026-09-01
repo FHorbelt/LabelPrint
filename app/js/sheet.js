@@ -78,6 +78,16 @@ export function pageRule(L) {
   return `@page{size:${L.pageW}mm ${L.pageH}mm; margin:0;}`;
 }
 
+// Zoomstufe in Prozent, bei der ein Bogen in die verfuegbare Breite passt.
+// Passt er ohnehin, bleibt es bei 100. Abgerundet auf ganze Prozent, damit
+// nichts an der Kante klemmt; die Untergrenze entspricht der des Zoomreglers.
+export function fitZoom(verfuegbarPx, seitenBreiteMm) {
+  const seitePx = seitenBreiteMm * 96 / 25.4;
+  if (!(verfuegbarPx > 0) || !(seitePx > 0)) return 100;
+  if (seitePx <= verfuegbarPx) return 100;
+  return Math.max(25, Math.floor(verfuegbarPx / seitePx * 100));
+}
+
 // Senkrechte Position der Oberkante einer Etikettenreihe, in Millimetern von
 // der Blattoberkante.
 //

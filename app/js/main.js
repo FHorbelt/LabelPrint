@@ -1,4 +1,4 @@
-import { computeLayout, pageRule, headingFits,
+import { computeLayout, pageRule, headingFits, fitZoom,
          correctedInkBottom, correctedInkLeft, correctedInkRight } from './sheet.js';
 import { DEFAULTS, BUILTIN, applyTemplate } from './presets.js';
 import { createStore } from './store.js';
@@ -267,16 +267,37 @@ function start() {
 
   let zoom = Number(ui.zoom) || 100;
   const setzeZoom = (z, merken = true) => {
-    zoom = Math.max(25, Math.min(200, z));
+    zoom = Math.max(25, Math.min(200, Math.round(z)));
     document.getElementById('zoom').textContent = `${zoom} %`;
-    document.getElementById('pagesWrap').style.transform = `scale(${zoom / 100})`;
+    document.getElementById('pagesWrap').style.zoom = zoom / 100;
     if (merken) store.saveUi({ ...store.loadUi(), zoom });
   };
+
+  // Verfuegbare Breite der Vorschau, abzueglich der Innenabstaende.
+  const platz = () => {
+    const c = document.querySelector('.canvas');
+    const cs = getComputedStyle(c);
+    return c.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  };
+  const passeEin = (merken = true) =>
+    setzeZoom(fitZoom(platz(), (letzteGueltige || readForm()).pageW), merken);
+
+  // Beim Laden und bei Groessenaenderung einpassen, aber nur wenn der Bogen
+  // sonst breiter waere als der Platz — ein selbst gewaehlter Zoom bleibt.
+  const einpassenFallsNoetig = (merken) => {
+    const noetig = fitZoom(platz(), (letzteGueltige || readForm()).pageW);
+    if (noetig < zoom) setzeZoom(noetig, merken);
+  };
+
   setzeZoom(zoom, false);
   $('zoomIn').addEventListener('click', () => setzeZoom(zoom + 25));
   $('zoomOut').addEventListener('click', () => setzeZoom(zoom - 25));
+  $('zoomFit').addEventListener('click', () => passeEin());
+  window.addEventListener('resize', () => einpassenFallsNoetig(false));
 
   zeichne();
+  // Nach dem ersten Zeichnen steht die Breite fest.
+  einpassenFallsNoetig(false);
 }
 
 start();
